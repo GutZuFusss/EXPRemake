@@ -18,3 +18,10 @@ Please visit https://www.teeworlds.com/ for up-to-date information about
 the game, including new versions, custom maps and much more.
 
 Originally written by Magnus Auvinen.
+
+Additional notes by the modification author
+-------------------------------------------
+
+It is required to make his changes to the source code available to others, 
+when distributing modified versions of EXPlorer. Also "xushTW" and "choupom"
+both need to be mentioned in the credits if you use any code of the modification.
