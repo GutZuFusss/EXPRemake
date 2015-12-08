@@ -1,11 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <generated/server_data.h>
+#include <math.h>
 
 #include "entities/character.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "player.h"
-
+#include <game/server/gamemodes/exp/bots.h>
+#include <game/server/gamemodes/exp/environment.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -39,7 +42,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Tick()
 {
-	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
+	if(!IsBot() && !Server()->ClientIngame(m_ClientID))
 		return;
 
 	Server()->SetClientScore(m_ClientID, m_Score);
@@ -119,7 +122,7 @@ void CPlayer::PostTick()
 
 void CPlayer::Snap(int SnappingClient)
 {
-	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
+	if(!IsBot() && !Server()->ClientIngame(m_ClientID))
 		return;
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, sizeof(CNetObj_PlayerInfo)));
@@ -360,13 +363,201 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 void CPlayer::TryRespawn()
 {
-	vec2 SpawnPos;
+	if(m_GameExp.m_LastFlag == 0)
+	{
+		vec2 SpawnPos = vec2(0.0f, 0.0f);
+		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+			return;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
-		return;
+		m_GameExp.m_EnterTick = Server()->Tick();
+		LoadGame(SpawnPos, m_GameExp.m_LastFlag, m_Score, 0, m_GameExp.m_ArmorMax, m_GameExp.m_Weapons, m_GameExp.m_Items, m_GameExp.m_BossHitter, m_GameExp.m_BossKiller);
+	}
+	else if(m_Team != -1)
+	{
+		LoadGame(((CGameControllerEXP*)GameServer()->m_pController)->m_aFlagsCP[m_GameExp.m_LastFlag-1]->GetPos(), m_GameExp.m_LastFlag,
+			m_Score, m_GameExp.m_Time, m_GameExp.m_ArmorMax, m_GameExp.m_Weapons, m_GameExp.m_Items, m_GameExp.m_BossHitter, m_GameExp.m_BossKiller);
+	}
+}
 
+void CPlayer::MakeBot(CBotSpawn *pSpawn)
+{
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_Team = 1;
+	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], pSpawn->m_Pos);
+	GameServer()->CreatePlayerSpawn(pSpawn->m_Pos);
+	m_BotLevel = pSpawn->m_Level;
+	m_pBotSpawn = pSpawn;
+	
+	m_pCharacter->m_Health = MaxHealth();
+	m_pCharacter->m_Armor = MaxArmor();
+	
+	if(m_BotLevel == 1)
+	{
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "bear", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "bear", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "hair", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES]));
+	}
+	else if(m_BotLevel == 2)
+	{
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES]));
+
+		m_pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got = false;
+		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
+		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Ammo = -1;
+		m_pCharacter->m_QueuedWeapon = WEAPON_KAMIKAZE;
+		m_pCharacter->m_ActiveWeapon = WEAPON_KAMIKAZE;
+	}
+	else if(m_BotLevel == 3)
+	{
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES]));
+
+		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
+	}
+	else if(m_BotLevel == 4)
+	{
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET]));
+		str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", sizeof(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES]));
+
+		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
+		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Ammo = -1;
+	}
+}
+
+int CPlayer::MaxHealth()
+{
+	if(m_BotLevel == 1)
+		return 10;
+	else if(m_BotLevel == 2)
+		return 8;
+	else if(m_BotLevel == 3)
+		return 10;
+	else if(m_BotLevel == 4)
+		return 200;
+	return 10;
+}
+
+int CPlayer::MaxArmor()
+{
+	if(m_BotLevel == 1)
+		return 0;
+	else if(m_BotLevel == 2)
+		return 0;
+	else if(m_BotLevel == 3)
+		return 5;
+	else if(m_BotLevel == 4)
+		return 0;
+	return 10;
+}
+
+const char *CPlayer::GetMonsterName()
+{
+	int Life = m_pCharacter->m_Health + m_pCharacter->m_Armor;
+	int MaxLife = MaxHealth() + MaxArmor();
+	float coef = (float)Life / (float)MaxLife;
+	
+	if(coef > 0.8f)
+		return "|-----|";
+	else if(coef > 0.6f)
+		return "|----|";
+	else if(coef > 0.4f)
+		return "|---|";
+	else if(coef > 0.2f)
+		return "|--|";
+	else
+		return "|-|";
+}
+
+void CPlayer::LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller)
+{
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
-	m_pCharacter->Spawn(this, SpawnPos);
+	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos);
+	m_GameExp.m_ArmorMax = Armor;
+	m_pCharacter->m_Armor = Armor;
+	m_GameExp.m_LastFlag = Flag;
+	m_GameExp.m_Kills = Kills;
+	m_Score = Kills;
+	m_GameExp.m_Time = Time;
+	if(w & (int)pow(2, WEAPON_GUN))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_GUN].m_Maxammo;
+	}
+	if(w & (int)pow(2, WEAPON_SHOTGUN))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_Maxammo;
+	}
+	if(w & (int)pow(2, WEAPON_GRENADE))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_GRENADE].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Maxammo;
+	}
+	if(w & (int)pow(2, WEAPON_LASER))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_LASER].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_LASER].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_LASER].m_Maxammo;
+	}
+	if(w & (int)pow(2, WEAPON_KAMIKAZE))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Ammo = -1;
+	}
+	if(w & (int)pow(2, WEAPON_FREEZER))
+	{
+		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Got = true;
+		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Ammo = -1;
+	}
+	m_GameExp.m_Weapons = w;
+	m_GameExp.m_Items = Items;
+	m_GameExp.m_BossHitter = BHitter;
+	m_GameExp.m_BossKiller = BKiller;
+}
+
+void CPlayer::GetWeapon(int WID)
+{
+	if(m_GameExp.m_Weapons & (int)pow(2, WID))
+		return;
+	
+	if(WID == WEAPON_LASER && m_GameExp.m_Weapons & (int)pow(2, WEAPON_FREEZER))
+		return;
+	if(WID == WEAPON_FREEZER)
+	{
+		m_GameExp.m_Weapons &= ~(int)pow(2, WEAPON_LASER);
+		if(m_pCharacter)
+			m_pCharacter->m_aWeapons[WEAPON_LASER].m_Got = false;
+	}
+	
+	m_GameExp.m_Weapons |= (int)pow(2, WID);
+	
+	if(m_pCharacter)
+	{
+		m_pCharacter->m_aWeapons[WID].m_Got = true;
+		
+		if(WID == WEAPON_HAMMER || WID == WEAPON_KAMIKAZE || WID == WEAPON_FREEZER)
+			m_pCharacter->m_aWeapons[WID].m_Ammo = -1;
+		else
+			m_pCharacter->m_aWeapons[WID].m_Ammo = g_pData->m_Weapons.m_aId[WID].m_Maxammo;
+	}
 }

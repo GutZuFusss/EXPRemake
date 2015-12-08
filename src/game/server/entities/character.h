@@ -58,6 +58,41 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 
+	// EXP
+	void Freeze();
+	bool m_Frozen;
+	float m_FrozenTimer;
+
+	bool DoorOpen();
+	int DoorCollision();
+	void Teleport(vec2 To);
+
+	float m_AttackTimer;
+	void HandleBot();
+	void Aim(vec2 Target);
+
+	// moved to public
+	int m_Health;
+	int m_Armor;
+
+	struct WeaponStat
+	{
+		int m_AmmoRegenStart;
+		int m_Ammo;
+		bool m_Got;
+
+	} m_aWeapons[NUM_WEAPONS+2];
+
+	int m_ActiveWeapon;
+	int m_LastWeapon;
+	int m_QueuedWeapon;
+
+	// the player core for the physics
+	CCharacterCore m_Core;
+
+	int m_EmoteType;
+	int m_EmoteStop;
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
@@ -68,25 +103,10 @@ private:
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;
 
-	struct WeaponStat
-	{
-		int m_AmmoRegenStart;
-		int m_Ammo;
-		bool m_Got;
-
-	} m_aWeapons[NUM_WEAPONS];
-
-	int m_ActiveWeapon;
-	int m_LastWeapon;
-	int m_QueuedWeapon;
-
 	int m_ReloadTimer;
 	int m_AttackTick;
 
 	int m_DamageTaken;
-
-	int m_EmoteType;
-	int m_EmoteStop;
 
 	// last tick that the player took any action ie some input
 	int m_LastAction;
@@ -103,9 +123,6 @@ private:
 
 	int m_DamageTakenTick;
 
-	int m_Health;
-	int m_Armor;
-
 	int m_TriggeredEvents;
 
 	// ninja
@@ -116,9 +133,6 @@ private:
 		int m_CurrentMoveTime;
 		int m_OldVelAmount;
 	} m_Ninja;
-
-	// the player core for the physics
-	CCharacterCore m_Core;
 
 	// info for dead reckoning
 	int m_ReckoningTick; // tick that we are performing dead reckoning From

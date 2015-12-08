@@ -18,6 +18,7 @@
 #include "gamemodes/mod.h"
 #include "gamemodes/sur.h"
 #include "gamemodes/tdm.h"
+#include "gamemodes/exp/exp.h"
 #include "gamecontext.h"
 #include "player.h"
 
@@ -148,6 +149,27 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, int MaxDamag
 			Force = normalize(Diff) * MaxForce;
 		float Factor = 1 - clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
 		apEnts[i]->TakeDamage(Force * Factor, (int)(Factor * MaxDamage), Owner, Weapon);
+	}
+
+	// TURRETS COLLISION
+	if(Owner >= 0 && m_apPlayers[Owner] && !m_apPlayers[Owner]->IsBot())
+	{
+		for(int b = 0; b < MAX_TURRETS; b++)
+		{
+			CTurret *t = &(((CGameControllerEXP*)m_pController)->m_aTurrets[b]);
+			if(!t->m_Used || t->m_Dead)
+				continue;
+			
+			vec2 Diff = t->m_Pos - Pos;
+			vec2 ForceDir(0, 1);
+			float l = length(Diff);
+			if(l) ForceDir = normalize(Diff);
+			l = 1-clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
+			
+			int Dmg = (int)(6 * l);
+			if(Dmg)
+				((CGameControllerEXP*)m_pController)->HitTurret(b, Owner, Dmg);
+		}
 	}
 }
 
@@ -526,7 +548,7 @@ void CGameContext::OnTick()
 	}
 
 
-#ifdef CONF_DEBUG
+/*#ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i] && m_apPlayers[i]->IsDummy())
@@ -536,7 +558,7 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->OnPredictedInput(&Input);
 		}
 	}
-#endif
+#endif*/
 }
 
 // Server hooks
@@ -597,7 +619,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(i == ClientID || !m_apPlayers[i] || (!Server()->ClientIngame(i) && !m_apPlayers[i]->IsDummy()))
+		if(i == ClientID || !m_apPlayers[i] || (!Server()->ClientIngame(i) && !m_apPlayers[i]->IsBot()))
 			continue;
 
 		// new info for others
@@ -634,12 +656,14 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 }
 
-void CGameContext::OnClientConnected(int ClientID, bool Dummy)
+void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool Bot)
 {
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, Dummy);
 	
-	if(Dummy)
+	if(Dummy || Bot)
 		return;
+
+	SendChatTarget(ClientID, "Welcome to the EXPlorer mod. Say '/info' for more info about EXPlorer.");
 
 	// send active vote
 	if(m_VoteCloseTime)
@@ -752,7 +776,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				!Server()->IsAuthed(ClientID))
 				Team = TEAM_SPECTATORS;
 
-			SendChat(ClientID, Team, pMsg->m_pMessage);
+			if(!((CGameControllerEXP*)m_pController)->CheckCommand(ClientID, Team, pMsg->m_pMessage))
+				SendChat(ClientID, Team, pMsg->m_pMessage);
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
@@ -1380,18 +1405,9 @@ void CGameContext::OnInit()
 	m_Collision.Init(&m_Layers);
 
 	// select gametype
-	if(str_comp_nocase(g_Config.m_SvGametype, "mod") == 0)
-		m_pController = new CGameControllerMOD(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0)
-		m_pController = new CGameControllerCTF(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0)
-		m_pController = new CGameControllerLMS(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "sur") == 0)
-		m_pController = new CGameControllerSUR(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0)
-		m_pController = new CGameControllerTDM(this);
-	else
-		m_pController = new CGameControllerDM(this);
+	m_pController = new CGameControllerEXP(this);
+
+	((CGameControllerEXP*)m_pController)->RegisterExpCommands();
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();

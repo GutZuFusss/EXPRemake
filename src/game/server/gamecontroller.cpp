@@ -30,10 +30,7 @@ IGameController::IGameController(CGameContext *pGameServer)
 	m_SuddenDeath = 0;
 	m_aTeamscore[TEAM_RED] = 0;
 	m_aTeamscore[TEAM_BLUE] = 0;
-	if(g_Config.m_SvWarmup)
-		SetGameState(IGS_WARMUP_USER, g_Config.m_SvWarmup);
-	else
-		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 
 	// info
 	m_GameFlags = 0;
@@ -60,7 +57,7 @@ void IGameController::DoActivityCheck()
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->IsDummy() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
+		if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->IsBot() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
 			!Server()->IsAuthed(i) && (GameServer()->m_apPlayers[i]->m_InactivityTickCounter > g_Config.m_SvInactiveKickTime*Server()->TickSpeed()*60))
 		{
 			switch(g_Config.m_SvInactiveKick)
@@ -122,6 +119,7 @@ bool IGameController::CanBeMovedOnBalance(int ClientID) const
 
 void IGameController::CheckTeamBalance()
 {
+	return;
 	if(!IsTeamplay() || !g_Config.m_SvTeambalanceTime)
 	{
 		m_UnbalancedTick = TBALANCE_OK;
@@ -206,18 +204,9 @@ int IGameController::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
-	if(pKiller == pVictim->GetPlayer())
-		pVictim->GetPlayer()->m_Score--; // suicide
-	else
-	{
-		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-			pKiller->m_Score--; // teamkill
-		else
-			pKiller->m_Score++; // normal kill
-	}
+
 	if(Weapon == WEAPON_SELF)
 		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
-
 
 	// update spectator modes for dead players in survival
 	if(m_GameFlags&GAMEFLAG_SURVIVAL)
@@ -232,30 +221,12 @@ int IGameController::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int
 
 void IGameController::OnCharacterSpawn(CCharacter *pChr)
 {
-	if(m_GameFlags&GAMEFLAG_SURVIVAL)
-	{
-		// give start equipment
-		pChr->IncreaseHealth(10);
-		pChr->IncreaseArmor(5);
+	// default health
+	pChr->IncreaseHealth(10);
 
-		pChr->GiveWeapon(WEAPON_HAMMER, -1);
-		pChr->GiveWeapon(WEAPON_GUN, 10);
-		pChr->GiveWeapon(WEAPON_SHOTGUN, 10);
-		pChr->GiveWeapon(WEAPON_GRENADE, 10);
-		pChr->GiveWeapon(WEAPON_LASER, 5);
-
-		// prevent respawn
-		pChr->GetPlayer()->m_RespawnDisabled = GetStartRespawnState();
-	}
-	else
-	{
-		// default health
-		pChr->IncreaseHealth(10);
-
-		// give default weapons
-		pChr->GiveWeapon(WEAPON_HAMMER, -1);
-		pChr->GiveWeapon(WEAPON_GUN, 10);
-	}
+	// give default weapons
+	pChr->GiveWeapon(WEAPON_HAMMER, -1);
+	//pChr->GiveWeapon(WEAPON_GUN, 10);
 }
 
 void IGameController::OnFlagReturn(CFlag *pFlag)
@@ -264,13 +235,6 @@ void IGameController::OnFlagReturn(CFlag *pFlag)
 
 bool IGameController::OnEntity(int Index, vec2 Pos)
 {
-	// don't add pickups in survival
-	if(m_GameFlags&GAMEFLAG_SURVIVAL)
-	{
-		if(Index < ENTITY_SPAWN || Index > ENTITY_SPAWN_BLUE)
-			return false;
-	}
-
 	int Type = -1;
 
 	switch(Index)
@@ -281,7 +245,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 	case ENTITY_SPAWN_RED:
 		m_aaSpawnPoints[1][m_aNumSpawnPoints[1]++] = Pos;
 		break;
-	case ENTITY_SPAWN_BLUE:
+	case ENTITY_SPAWN_BOT_LEVEL_1:
 		m_aaSpawnPoints[2][m_aNumSpawnPoints[2]++] = Pos;
 		break;
 	case ENTITY_ARMOR_1:
@@ -627,10 +591,10 @@ void IGameController::StartRound()
 	++m_RoundCount;
 
 	// start countdown if there're enough players, otherwise abort to warmup
-	if(HasEnoughPlayers())
+	/*if(HasEnoughPlayers())
 		SetGameState(IGS_START_COUNTDOWN);
-	else
-		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	else*/
+		SetGameState(IGS_GAME_RUNNING, TIMER_INFINITE);
 }
 
 // general
@@ -804,6 +768,9 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2) const
 	if(ClientID1 == ClientID2)
 		return false;
 
+	if(ClientID1 < 0 || ClientID2 < 0)
+		return false;
+
 	if(IsTeamplay())
 	{
 		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
@@ -943,25 +910,10 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos) const
 
 	CSpawnEval Eval;
 
-	if(IsTeamplay())
-	{
-		Eval.m_FriendlyTeam = Team;
-
-		// first try own team spawn, then normal spawn and then enemy
-		EvaluateSpawnType(&Eval, 1+(Team&1));
-		if(!Eval.m_Got)
-		{
-			EvaluateSpawnType(&Eval, 0);
-			if(!Eval.m_Got)
-				EvaluateSpawnType(&Eval, 1+((Team+1)&1));
-		}
-	}
-	else
-	{
-		EvaluateSpawnType(&Eval, 0);
-		EvaluateSpawnType(&Eval, 1);
-		EvaluateSpawnType(&Eval, 2);
-	}
+	Eval.m_FriendlyTeam = Team;
+		
+	// try first try own team spawn
+	EvaluateSpawnType(&Eval, 1+(Team&1));
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -1115,6 +1067,8 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 int IGameController::GetStartTeam()
 {
 	// this will force the auto balancer to work overtime aswell
+	return TEAM_RED;
+
 	if(g_Config.m_DbgStress)
 		return TEAM_RED;
 

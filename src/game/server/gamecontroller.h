@@ -81,8 +81,6 @@ class IGameController
 		int m_FriendlyTeam;
 		float m_Score;
 	};
-	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
 	
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos) const;
 	void EvaluateSpawnType(CSpawnEval *pEval, int Type) const;
@@ -103,6 +101,9 @@ protected:
 
 	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END); }
+
+	vec2 m_aaSpawnPoints[3][64];
+	int m_aNumSpawnPoints[3];
 
 	// info
 	int m_GameFlags;

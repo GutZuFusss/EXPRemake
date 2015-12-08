@@ -17,6 +17,18 @@ public:
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
+	// EXP
+	bool m_FromDrop;
+	float m_AnimationTimer;
+	float m_DieTimer;
+	bool m_IsBossShield;
+	
+	const char *GetWeaponName(int wid);
+	int RealPickup(int Type);
+	void CreateRandomFromBot(int lvl);
+	void CreateRandomFromTurret(int TurretType);
+	void MakeBossShield();
+
 private:
 	int m_Type;
 	int m_SpawnTick;

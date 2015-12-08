@@ -44,4 +44,29 @@ MACRO_TUNING_PARAM(LaserBounceCost, laser_bounce_cost, 0)
 
 MACRO_TUNING_PARAM(PlayerCollision, player_collision, 1)
 MACRO_TUNING_PARAM(PlayerHooking, player_hooking, 1)
+
+// EXPlorer tunings
+//	All timer/reload/lifespan tunings are in seconds.
+//	If a timer is from a tuning, it will be set to "server_tick()", and it will be checked with "server_tick() > timer + tuning.timer*server_tickspeed()"
+//	Else it will be set to "server_tick() + seconds*server_tickspeed()", and it will be checked with "server_tick() > timer"
+
+// misc
+MACRO_TUNING_PARAM(RespawnTimer, respawn_timer, 20.0f)
+MACRO_TUNING_PARAM(RegenTimer, regen_timer, 1.0f)
+MACRO_TUNING_PARAM(PoisonTimer, poison_timer, 1.0f)
+MACRO_TUNING_PARAM(PickupLifetime, pickup_lifetime, 20.0f)
+
+// turrets
+MACRO_TUNING_PARAM(TurretLife,turret_life, 20)
+MACRO_TUNING_PARAM(TurretReload, turret_reload, 0.5f)
+MACRO_TUNING_PARAM(TurretLaserDamage, turret_laser_damage, 3)
+MACRO_TUNING_PARAM(TurretLaserRadius, turret_laser_radius, 160)
+
+// boss
+MACRO_TUNING_PARAM(BossLife, boss_life, 200)
+MACRO_TUNING_PARAM(BossDistancelimit, boss_distancelimit, 1000.0f)
+
+// freezing
+MACRO_TUNING_PARAM(FreezerReload, freezer_reload, 1.5f)
+MACRO_TUNING_PARAM(FreezerTimer, freeze_timer, 2.5f)
 #endif

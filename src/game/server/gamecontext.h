@@ -169,7 +169,7 @@ public:
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID) { OnClientConnected(ClientID, false); }
-	void OnClientConnected(int ClientID, bool Dummy);
+	void OnClientConnected(int ClientID, bool Dummy, bool Bot = false);
 	void OnClientTeamChange(int ClientID);
 	virtual void OnClientEnter(int ClientID);
 	virtual void OnClientDrop(int ClientID, const char *pReason);

@@ -39,14 +39,6 @@ private:
 	bool m_MarkedForDestroy;
 
 protected:
-	/* State */
-
-	/*
-		Variable: m_Pos
-			Contains the current posititon of the entity.
-	*/
-	vec2 m_Pos;
-
 	/* Getters */
 	int GetID() const					{ return m_ID; }
 
@@ -61,6 +53,14 @@ public:
 	class CGameWorld *GameWorld()		{ return m_pGameWorld; }
 	class CGameContext *GameServer()	{ return m_pGameWorld->GameServer(); }
 	class IServer *Server()				{ return m_pGameWorld->Server(); }
+
+	/* State */
+
+	/*
+		Variable: m_Pos
+			Contains the current posititon of the entity.
+	*/
+	vec2 m_Pos;
 
 	/* Getters */
 	CEntity *TypeNext()					{ return m_pNextTypeEntity; }

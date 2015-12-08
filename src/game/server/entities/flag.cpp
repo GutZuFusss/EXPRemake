@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/player.h>
+#include <game/server/gamemodes/exp/exp.h>
 
 #include "character.h"
 #include "flag.h"
@@ -83,8 +85,19 @@ void CFlag::TickPaused()
 
 void CFlag::Snap(int SnappingClient)
 {
-	if(NetworkClipped(SnappingClient))
-		return;
+	if(m_Team == 0)
+	{
+		if(NetworkClipped(SnappingClient))
+			return;
+
+		//if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos) > 550)
+		//	return;
+	}
+	else
+	{
+		if(((CGameControllerEXP*)GameServer()->m_pController)->m_Boss.m_Exist && !GameServer()->m_apPlayers[SnappingClient]->m_GameExp.m_BossKiller)
+			return;
+	}
 
 	CNetObj_Flag *pFlag = (CNetObj_Flag *)Server()->SnapNewItem(NETOBJTYPE_FLAG, m_Team, sizeof(CNetObj_Flag));
 	if(!pFlag)
