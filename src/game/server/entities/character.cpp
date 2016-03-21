@@ -1114,41 +1114,41 @@ void CCharacter::HandleBot()
 	m_LatestInput.m_Fire = 0;
 	m_Input.m_Fire = 0;
 	
-	CCharacter * TargetChr = GameServer()->m_World.ClosestCharacter(m_Pos, 700.0f, NULL, true);
-	if(!TargetChr)
+	CCharacter *pTargetChr = GameServer()->m_World.ClosestCharacter(m_Pos, 700.0f, NULL, true);
+	if(!pTargetChr)
 		return;
 	
 	if(m_pPlayer->m_BotLevel == 1)
 	{
 		//1) weapon :
-		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
+		if(distance(pTargetChr->m_Pos, m_Pos) < 64.0f)
 			m_QueuedWeapon = WEAPON_HAMMER;
 		else
 			m_QueuedWeapon = WEAPON_GUN;
 		
 		//2) move :
-		if(m_Pos.x < TargetChr->m_Pos.x)
+		if(m_Pos.x < pTargetChr->m_Pos.x)
 			m_Input.m_Direction = 1;
-		else if(m_Pos.x > TargetChr->m_Pos.x)
+		else if(m_Pos.x > pTargetChr->m_Pos.x)
 			m_Input.m_Direction = -1;
 		vec2 FuturePos;
 		FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
 		FuturePos.y = m_Pos.y;
-		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > pTargetChr->m_Pos.y) && !Jumping)
 		{
 			if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
 				m_Input.m_Jump = 1;
 		}
 		
 		//3) aim :
-		Aim(TargetChr->m_Pos);
+		Aim(pTargetChr->m_Pos);
 		
-		if(!GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false))
+		if(!GameServer()->Collision()->IntersectLine(m_Pos, pTargetChr->m_Pos, NULL, NULL, false))
 		{
 			//4) fire :
 			if(m_QueuedWeapon != m_ActiveWeapon)
 				return;
-			if(distance(TargetChr->m_Pos, m_Pos) < 500.0f
+			if(distance(pTargetChr->m_Pos, m_Pos) < 500.0f
 				&& m_aWeapons[m_ActiveWeapon].m_Ammo != 0 && m_ReloadTimer == 0
 				&& (float)Server()->Tick() - m_AttackTimer > 0)
 			{
@@ -1161,24 +1161,24 @@ void CCharacter::HandleBot()
 	else if(m_pPlayer->m_BotLevel == 2)
 	{
 		//1) move :
-		if(m_Pos.x < TargetChr->m_Pos.x)
+		if(m_Pos.x < pTargetChr->m_Pos.x)
 			m_Input.m_Direction = 1;
-		else if(m_Pos.x > TargetChr->m_Pos.x)
+		else if(m_Pos.x > pTargetChr->m_Pos.x)
 			m_Input.m_Direction = -1;
 		vec2 FuturePos;
 		FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
 		FuturePos.y = m_Pos.y;
-		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > pTargetChr->m_Pos.y) && !Jumping)
 		{
 			if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
 				m_Input.m_Jump = 1;
 		}
 		
 		//2) aim :
-		Aim(TargetChr->m_Pos);
+		Aim(pTargetChr->m_Pos);
 
 		//3) fire :
-		if(distance(TargetChr->m_Pos, m_Pos) < 48.0f)
+		if(distance(pTargetChr->m_Pos, m_Pos) < 48.0f)
 		{
 			m_LatestInput.m_Fire = 1;
 			m_Input.m_Fire = 1;
@@ -1191,7 +1191,7 @@ void CCharacter::HandleBot()
 		if(m_aWeapons[WEAPON_SHOTGUN].m_Got && m_aWeapons[WEAPON_SHOTGUN].m_Ammo != 0)
 			Shotgun = true;
 
-		float d = distance(m_Pos, TargetChr->m_Pos);
+		float d = distance(m_Pos, pTargetChr->m_Pos);
 		if(d < 64)
 			m_QueuedWeapon = WEAPON_HAMMER;
 		else if(d < 480)
@@ -1208,7 +1208,7 @@ void CCharacter::HandleBot()
 			return;
 		
 		//2) move :
-		if(GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false)) //no enemy visible, walk
+		if(GameServer()->Collision()->IntersectLine(m_Pos, pTargetChr->m_Pos, NULL, NULL, false)) //no enemy visible, walk
 		{
 			if(m_Core.m_Vel.x > 0)
 				m_Input.m_Direction = 1;
@@ -1225,7 +1225,7 @@ void CCharacter::HandleBot()
 		}
 		else
 		{
-			vec2 HisPos = TargetChr->m_Pos;
+			vec2 HisPos = pTargetChr->m_Pos;
 			if(m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_HAMMER)
 			{
 				//keep him close
@@ -1233,7 +1233,7 @@ void CCharacter::HandleBot()
 					m_Input.m_Direction = -1;
 				else if(HisPos.x > m_Pos.x)
 					m_Input.m_Direction = 1;
-				Aim(TargetChr->m_Pos);
+				Aim(pTargetChr->m_Pos);
 				if(Server()->Tick()%10 == 0)
 					m_Input.m_Hook ^= 1;
 			}
@@ -1245,14 +1245,14 @@ void CCharacter::HandleBot()
 			bool Fire = false;
 			if(m_ActiveWeapon == WEAPON_HAMMER || m_ActiveWeapon == WEAPON_SHOTGUN)
 			{
-				Aim(TargetChr->m_Pos);
+				Aim(pTargetChr->m_Pos);
 				Fire = true;
 			}
 			else
 			{
-				vec2 TrgPos = TargetChr->m_Pos + TargetChr->m_Core.m_Vel;
+				vec2 TrgPos = pTargetChr->m_Pos + pTargetChr->m_Core.m_Vel;
 				float Angle = angle(vec2(TrgPos.x-m_Pos.x, -(TrgPos.y-m_Pos.y)));
-				if(TargetChr->m_Pos.x < m_Pos.x)
+				if(pTargetChr->m_Pos.x < m_Pos.x)
 					Angle -= 1.25f*3 * 3.14159265358979/180.0f;
 				else
 					Angle += 1.25f*3 * 3.14159265358979/180.0f;
@@ -1273,34 +1273,34 @@ void CCharacter::HandleBot()
 	{
 		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
 		
-		float d = distance(m_Pos, TargetChr->m_Pos);
+		float d = distance(m_Pos, pTargetChr->m_Pos);
 		if(d < 64.0f || (float)Server()->Tick() < pBoss->m_FreezerTimer)
 			m_ActiveWeapon = WEAPON_HAMMER;
 		else
 			m_ActiveWeapon = WEAPON_FREEZER;
 		
-		Aim(TargetChr->m_Pos);
+		Aim(pTargetChr->m_Pos);
 		
 		//if(m_QueuedWeapon != m_ActiveWeapon)
 		//	return;
 		
-		if(TargetChr->m_Frozen || d < 256.0f)
+		if(pTargetChr->m_Frozen || d < 256.0f)
 		{
-			if(m_Pos.x < TargetChr->m_Pos.x)
+			if(m_Pos.x < pTargetChr->m_Pos.x)
 				m_Input.m_Direction = 1;
-			else if(m_Pos.x > TargetChr->m_Pos.x)
+			else if(m_Pos.x > pTargetChr->m_Pos.x)
 				m_Input.m_Direction = -1;
 			vec2 FuturePos;
 			FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
 			FuturePos.y = m_Pos.y;
-			if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+			if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > pTargetChr->m_Pos.y) && !Jumping)
 			{
 				if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
 					m_Input.m_Jump = 1;
 			}
 		}
 		
-		if(!GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false) && m_ReloadTimer == 0 && (m_aWeapons[m_ActiveWeapon].m_Ammo == -1 || m_aWeapons[m_ActiveWeapon].m_Ammo > 0))
+		if(!GameServer()->Collision()->IntersectLine(m_Pos, pTargetChr->m_Pos, NULL, NULL, false) && m_ReloadTimer == 0 && (m_aWeapons[m_ActiveWeapon].m_Ammo == -1 || m_aWeapons[m_ActiveWeapon].m_Ammo > 0))
 		{
 			m_LatestInput.m_Fire = 1;
 			m_Input.m_Fire = 1;
