@@ -12,9 +12,6 @@
 */
 class IGameController
 {
-	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
-
 	class CGameContext *m_pGameServer;
 	class IServer *m_pServer;
 
@@ -144,6 +141,9 @@ public:
 	int ClampTeam(int Team);
 
 	virtual void PostReset();
+
+	vec2 m_aaSpawnPoints[3][64];
+	int m_aNumSpawnPoints[3];
 };
 
 #endif

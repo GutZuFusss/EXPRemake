@@ -4,6 +4,7 @@
 #include "gameworld.h"
 #include "entity.h"
 #include "gamecontext.h"
+#include "player.h"
 
 //////////////////////////////////////////////////
 // game world
@@ -220,7 +221,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 }
 
 
-CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis)
+CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis, bool NoBot)
 {
 	// Find other players
 	float ClosestRange = Radius*2;
@@ -229,7 +230,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 	CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
  	{
-		if(p == pNotThis)
+		if(p == pNotThis || (NoBot && p->GetPlayer()->IsBot()))
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);

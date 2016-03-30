@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+ /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
@@ -31,7 +31,7 @@ enum
 	ENTITY_NULL=0,
 	ENTITY_SPAWN,
 	ENTITY_SPAWN_RED,
-	ENTITY_SPAWN_BLUE,
+	ENTITY_SPAWN_BOT_LEVEL_1,
 	ENTITY_FLAGSTAND_RED,
 	ENTITY_FLAGSTAND_BLUE,
 	ENTITY_ARMOR_1,
@@ -40,12 +40,31 @@ enum
 	ENTITY_WEAPON_GRENADE,
 	ENTITY_POWERUP_NINJA,
 	ENTITY_WEAPON_RIFLE,
-	NUM_ENTITIES,
+	
+	ENTITY_TURRET_LASER=17,
+	ENTITY_TURRET_GUN=33,
+	
+	ENTITY_MINE=18,
+	ENTITY_TRAP=34,
+	
+	ENTITY_SPAWN_BOT_LEVEL_2=19,
+	ENTITY_SPAWN_BOT_LEVEL_3=35,
+	ENTITY_SPAWN_BOSS=51,
+	
+	ENTITY_DOOR_VERTICAL=20,
+	ENTITY_DOOR_HORIZONTAL=36,
+	
+	NUM_ENTITIES=64,
 
 	TILE_AIR=0,
 	TILE_SOLID,
 	TILE_DEATH,
 	TILE_NOHOOK,
+	TILE_HEALING,
+	TILE_POISON,
+
+	TELEPORT_OFFSET=35,
+	NUM_TELEPORTS=50,
 
 	TILEFLAG_VFLIP=1,
 	TILEFLAG_HFLIP=2,

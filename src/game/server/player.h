@@ -5,6 +5,7 @@
 
 // this include should perhaps be removed
 #include "entities/character.h"
+#include <game/server/gamemodes/exp/exp.h>
 #include "gamecontext.h"
 
 // player object
@@ -95,6 +96,37 @@ public:
 		int m_Min;
 		int m_Max;
 	} m_Latency;
+
+	// bots
+	struct CBotSpawn *m_pBotSpawn;
+	int m_BotLevel;
+	inline bool IsBot() { return m_Team == 1; };
+	void MakeBot(struct CBotSpawn *pSpawn);
+	void DestroyBot();
+	int MaxHealth();
+	int MaxArmor();
+	const char *GetMonsterName();
+	bool m_MustRemoveBot;
+	vec2 m_LastPos;
+	float m_NobodyTimer;
+
+	struct CGame
+	{
+		int m_EnterTick; //ticks
+		int m_Time; //seconds
+		int m_Kills;
+		int m_LastFlag;
+		int m_ArmorMax;
+		int m_Weapons;
+		float m_RegenTimer; //ticks
+		float m_PoisonTimer; //ticks
+		CItems m_Items;
+		bool m_BossHitter;
+		bool m_BossKiller;
+	} m_GameExp;
+
+	void LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller);
+	void GetWeapon(int wid);
 
 private:
 	CCharacter *m_pCharacter;

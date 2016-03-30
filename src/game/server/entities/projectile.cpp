@@ -2,6 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
+#include <game/server/player.h>
+
 #include "projectile.h"
 
 CProjectile::CProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, vec2 Dir, int Span,
@@ -66,6 +69,34 @@ void CProjectile::Tick()
 	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, CurPos, 6.0f, CurPos, OwnerChar);
 
 	m_LifeSpan--;
+
+	bool TurretDamage = false;
+	
+	// TURRETS COLLISION
+	if(m_Owner >= 0 && GameServer()->m_apPlayers[m_Owner] && !GameServer()->m_apPlayers[m_Owner]->IsBot())
+	{
+		for(int b = 0; b < MAX_TURRETS; b++)
+		{
+			CTurret *t = &(((CGameControllerEXP*)GameServer()->m_pController)->m_aTurrets[b]);
+			if(!t->m_Used || t->m_Dead)
+				continue;
+			
+			float CloestLen = distance(PrevPos, CurPos) * 100.0f;
+			vec2 IntersectPos = closest_point_on_line(PrevPos, CurPos, t->m_Pos);
+			float Len = distance(t->m_Pos, IntersectPos);
+			
+			if(Len < 32.0f && Len < CloestLen)
+			{
+				if(m_Weapon != WEAPON_GRENADE)
+				{
+					int Dmg = m_Damage+m_Force;
+					if(Dmg)
+						((CGameControllerEXP*)GameServer()->m_pController)->HitTurret(b, m_Owner, (int)(m_Damage+m_Force));
+				}
+				TurretDamage = true;
+			}
+		}
+	}
 
 	if(TargetChr || Collide || m_LifeSpan < 0 || GameLayerClipped(CurPos))
 	{

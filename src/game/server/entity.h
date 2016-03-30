@@ -154,6 +154,8 @@ public:
 			Contains the current posititon of the entity.
 	*/
 	vec2 m_Pos;
+	vec2 GetPos() { return m_Pos; }
+	int GetID() const { return m_ID; }
 };
 
 #endif

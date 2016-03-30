@@ -13,6 +13,7 @@
 #include "gamemodes/tdm.h"
 #include "gamemodes/ctf.h"
 #include "gamemodes/mod.h"
+#include "gamemodes/exp/exp.h"
 
 enum
 {
@@ -144,6 +145,27 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			float Dmg = 6 * l;
 			if((int)Dmg)
 				apEnts[i]->TakeDamage(ForceDir*Dmg*2, (int)Dmg, Owner, Weapon);
+		}
+
+		// TURRETS COLLISION
+		if(Owner >= 0 && m_apPlayers[Owner] && !m_apPlayers[Owner]->IsBot())
+		{
+			for(int b = 0; b < MAX_TURRETS; b++)
+			{
+				CTurret *t = &(((CGameControllerEXP*)m_pController)->m_aTurrets[b]);
+				if(!t->m_Used || t->m_Dead)
+					continue;
+				
+				vec2 Diff = t->m_Pos - Pos;
+				vec2 ForceDir(0, 1);
+				float l = length(Diff);
+				if(l) ForceDir = normalize(Diff);
+				l = 1-clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
+				
+				int Dmg = (int)(6 * l);
+				if(Dmg)
+					((CGameControllerEXP*)m_pController)->HitTurret(b, Owner, Dmg);
+			}
 		}
 	}
 }
@@ -545,14 +567,17 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_VoteUpdate = true;
 }
 
-void CGameContext::OnClientConnected(int ClientID)
+void CGameContext::OnClientConnected(int ClientID, bool Bot)
 {
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
-	//players[client_id].init(client_id);
-	//players[client_id].client_id = client_id;
+	
+	if(Bot)
+  		return;
+
+  	SendChatTarget(ClientID, "Welcome to the EXPlorer mod. Say '/info' for more info about EXPlorer.");
 
 	(void)m_pController->CheckTeamBalance();
 
@@ -652,7 +677,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastChat = Server()->Tick();
 
-			SendChat(ClientID, Team, pMsg->m_pMessage);
+			if(!((CGameControllerEXP*)m_pController)->CheckCommand(ClientID, Team, pMsg->m_pMessage))
+				SendChat(ClientID, Team, pMsg->m_pMessage);
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
@@ -1489,14 +1515,9 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	//players = new CPlayer[MAX_CLIENTS];
 
 	// select gametype
-	if(str_comp(g_Config.m_SvGametype, "mod") == 0)
-		m_pController = new CGameControllerMOD(this);
-	else if(str_comp(g_Config.m_SvGametype, "ctf") == 0)
-		m_pController = new CGameControllerCTF(this);
-	else if(str_comp(g_Config.m_SvGametype, "tdm") == 0)
-		m_pController = new CGameControllerTDM(this);
-	else
-		m_pController = new CGameControllerDM(this);
+	m_pController = new CGameControllerEXP(this);
+
+	((CGameControllerEXP*)m_pController)->RegisterExpCommands();
 
 	// setup core world
 	//for(int i = 0; i < MAX_CLIENTS; i++)

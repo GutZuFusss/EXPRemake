@@ -5,7 +5,12 @@
 #include <game/server/gamecontext.h>
 #include <game/mapitems.h>
 
+#include <game/server/gamemodes/exp/exp.h>
+#include <game/server/gamemodes/exp/environment.h>
+#include <game/server/gamemodes/exp/bots.h>
+
 #include "character.h"
+#include "door.h"
 #include "laser.h"
 #include "projectile.h"
 
@@ -57,7 +62,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	m_ActiveWeapon = WEAPON_GUN;
+
+	m_ActiveWeapon = WEAPON_HAMMER;	
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 
@@ -113,7 +119,7 @@ bool CCharacter::IsGrounded()
 
 void CCharacter::HandleNinja()
 {
-	if(m_ActiveWeapon != WEAPON_NINJA)
+	if(m_ActiveWeapon != WEAPON_NINJA || m_Frozen)
 		return;
 
 	if ((Server()->Tick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
@@ -235,6 +241,11 @@ void CCharacter::HandleWeaponSwitch()
 	if(m_LatestInput.m_WantedWeapon)
 		WantedWeapon = m_Input.m_WantedWeapon-1;
 
+	if(WantedWeapon == WEAPON_NINJA)
+		WantedWeapon = WEAPON_KAMIKAZE;
+	else if(WantedWeapon == WEAPON_RIFLE && m_aWeapons[WEAPON_FREEZER].m_Got)
+		WantedWeapon = WEAPON_FREEZER;
+
 	// check for insane values
 	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_ActiveWeapon && m_aWeapons[WantedWeapon].m_Got)
 		m_QueuedWeapon = WantedWeapon;
@@ -244,7 +255,7 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(m_ReloadTimer != 0)
+	if(m_ReloadTimer != 0 || m_Frozen)
 		return;
 
 	DoWeaponSwitch();
@@ -316,6 +327,30 @@ void CCharacter::FireWeapon()
 				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 					m_pPlayer->GetCID(), m_ActiveWeapon);
 				Hits++;
+
+				if(apEnts[i]->m_Frozen && GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), apEnts[i]->GetPlayer()->GetCID()))
+					apEnts[i]->m_FrozenTimer = (float)Server()->Tick() - 1;
+			}
+
+			// TURRETS COLLISION
+			if(!m_pPlayer->IsBot())
+			{
+				for(int b = 0; b < MAX_TURRETS; b++)
+				{
+					CTurret *t = &(((CGameControllerEXP*)GameServer()->m_pController)->m_aTurrets[b]);
+					if(!t->m_Used || t->m_Dead)
+						continue;
+					
+					float Len = distance(t->m_Pos, m_Pos+Direction*ms_PhysSize*0.75f);
+					
+					if(Len < ms_PhysSize*0.5f)
+					{
+						GameServer()->CreateHammerHit(m_Pos);
+						if(g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage)
+							((CGameControllerEXP*)GameServer()->m_pController)->HitTurret(b, m_pPlayer->GetCID(), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage);
+						Hits++;
+					}
+				}
 			}
 
 			// if we Hit anything, we have to wait for the reload
@@ -372,7 +407,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_RIFLE:
 		{
-			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID());
+			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), false, false);
 			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE);
 		} break;
 
@@ -386,6 +421,21 @@ void CCharacter::FireWeapon()
 			m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
 			GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE);
+		} break;
+
+		case WEAPON_KAMIKAZE:
+		{
+			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_KAMIKAZE, 25);
+			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
+			if(m_Alive)
+				Die(m_pPlayer->GetCID(), WEAPON_NINJA);
+		} break;
+		
+		case WEAPON_FREEZER:
+		{
+			new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), false, true);
+			GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE);
+			m_ReloadTimer = GameServer()->Tuning()->m_FreezerReload*Server()->TickSpeed();
 		} break;
 
 	}
@@ -525,8 +575,32 @@ void CCharacter::Tick()
 		m_pPlayer->m_ForceBalanced = false;
 	}
 
+	m_pPlayer->m_LastPos = m_Pos;
+	if(m_Frozen && (float)Server()->Tick() > m_FrozenTimer)
+	{
+		m_Frozen = false;
+		m_aWeapons[WEAPON_NINJA].m_Got = false;
+		m_ActiveWeapon = m_LastWeapon;
+		m_LastWeapon = -1;
+		m_QueuedWeapon = -1;
+	}
+
+	if(m_pPlayer->IsBot())
+		HandleBot();
+
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true);
+
+	if(m_Frozen)
+	{
+		if(m_Core.m_Vel.y > 0.0f)
+			m_Core.m_Vel = vec2(0.0f, m_Core.m_Vel.y);
+		else
+			m_Core.m_Vel = vec2(0.0f, 0.0f);
+		m_Core.m_HookedPlayer = -1;
+		m_Core.m_HookState = HOOK_RETRACTED;
+		m_Core.m_HookPos = m_Pos;
+	}
 
 	// handle death-tiles and leaving gamelayer
 	if(GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
@@ -563,6 +637,16 @@ void CCharacter::TickDefered()
 	bool StuckBefore = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
 
 	m_Core.Move();
+
+	int DoorCol = DoorCollision();
+	if(DoorCol != -1)
+		m_Core.m_Pos = StartPos;
+	
+	if(DoorCol == DOOR_TYPE_VERTICAL)
+		m_Core.m_Vel.x *= -1.1f;
+	else if(DoorCol == DOOR_TYPE_HORIZONTAL)
+		m_Core.m_Vel.y *= -1.1f;
+
 	bool StuckAfterMove = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
 	m_Core.Quantize();
 	bool StuckAfterQuant = GameServer()->Collision()->TestBox(m_Core.m_Pos, vec2(28.0f, 28.0f));
@@ -645,17 +729,17 @@ void CCharacter::TickPaused()
 
 bool CCharacter::IncreaseHealth(int Amount)
 {
-	if(m_Health >= 10)
+	if(m_Health >= m_pPlayer->MaxHealth())
 		return false;
-	m_Health = clamp(m_Health+Amount, 0, 10);
+	m_Health = clamp(m_Health+Amount, 0, m_pPlayer->MaxHealth());
 	return true;
 }
 
 bool CCharacter::IncreaseArmor(int Amount)
 {
-	if(m_Armor >= 10)
+	if(m_Armor >= m_pPlayer->MaxHealth())
 		return false;
-	m_Armor = clamp(m_Armor+Amount, 0, 10);
+	m_Armor = clamp(m_Armor+Amount, 0, m_pPlayer->MaxHealth());
 	return true;
 }
 
@@ -689,10 +773,76 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
+
+	if(m_pPlayer->IsBot())
+	{
+		m_pPlayer->m_MustRemoveBot = true;
+		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_GUN)))
+		{
+			GameServer()->m_apPlayers[Killer]->GetWeapon(WEAPON_GUN);
+            GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
+			GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
+		}
+
+		if(m_pPlayer->m_BotLevel == 4)
+		{
+			for(int i = 0; i < g_Config.m_SvMaxClients; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_GameExp.m_BossHitter)
+					GameServer()->m_apPlayers[i]->m_GameExp.m_BossKiller = true;
+			}
+		}
+	}
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	// debug...
+	//if(!m_pPlayer->IsBot())
+	//	return false;
+	if(m_pPlayer->IsBot() && m_pPlayer->m_BotLevel == 4)
+	{
+		if(From >= 0 && GameServer()->m_apPlayers[From])
+			GameServer()->m_apPlayers[From]->m_GameExp.m_BossHitter = true;
+		
+		/*CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
+		
+		if(pBoss->m_ShieldActive)
+		{
+			if(Weapon == WEAPON_HAMMER)
+				pBoss->m_ShieldHealth -= 3;
+			else
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH);
+			
+			if(pBoss->m_ShieldHealth <= 12 && pBoss->m_apShieldIcons[2])
+			{
+				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[2]);
+				pBoss->m_apShieldIcons[2] = NULL;
+			}
+			if(pBoss->m_ShieldHealth <= 6 && pBoss->m_apShieldIcons[1])
+			{
+				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[1]);
+				pBoss->m_apShieldIcons[1] = NULL;
+			}
+			if(pBoss->m_ShieldHealth <= 0 && pBoss->m_apShieldIcons[0])
+			{
+				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[0]);
+				pBoss->m_apShieldIcons[0] = NULL;
+			}
+			
+			if(pBoss->m_ShieldHealth <= 0)
+			{
+				pBoss->m_ShieldActive = false;
+				pBoss->m_ShieldTimer = (float)Server()->Tick() + 15.0f*Server()->TickSpeed();
+				GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
+				GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
+			}
+			
+			m_Core.m_Vel += Force*0.5f;
+			return true;
+		}*/
+	}
+
 	m_Core.m_Vel += Force;
 
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
@@ -821,7 +971,16 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_Health = 0;
 	pCharacter->m_Armor = 0;
 
-	pCharacter->m_Weapon = m_ActiveWeapon;
+	if(m_ActiveWeapon == WEAPON_KAMIKAZE)
+		pCharacter->m_Weapon = WEAPON_NINJA;
+	else if(m_ActiveWeapon == WEAPON_FREEZER)
+		pCharacter->m_Weapon = WEAPON_RIFLE;
+	else
+		pCharacter->m_Weapon = m_ActiveWeapon;
+
+	if(m_pPlayer->m_BotLevel == 2 && !m_Frozen)
+		m_AttackTick = Server()->Tick();
+
 	pCharacter->m_AttackTick = m_AttackTick;
 
 	pCharacter->m_Direction = m_Input.m_Direction;
@@ -842,4 +1001,323 @@ void CCharacter::Snap(int SnappingClient)
 	}
 
 	pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
+}
+
+void CCharacter::Freeze()
+{
+	m_Frozen = true;
+	m_FrozenTimer = (float)Server()->Tick() + GameServer()->Tuning()->m_FreezerTimer*Server()->TickSpeed();
+	
+	m_Ninja.m_ActivationTick = Server()->Tick();
+	m_aWeapons[WEAPON_NINJA].m_Got = true;
+	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+	m_LastWeapon = m_ActiveWeapon;
+	m_ActiveWeapon = WEAPON_NINJA;
+	
+	if(m_pPlayer->m_BotLevel == 4)
+	{
+		CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
+		pBoss->m_ShieldHealth = 0;
+		pBoss->m_ShieldTimer = (float)Server()->Tick() + 15.0f*Server()->TickSpeed();
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
+		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
+	}
+}
+
+bool CCharacter::DoorOpen()
+{
+	if(m_pPlayer->IsBot())
+		return true;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!GameServer()->m_apPlayers[i] || !GameServer()->m_apPlayers[i]->IsBot() || !GameServer()->m_apPlayers[i]->GetCharacter())
+			continue;
+		if(distance(m_Pos, GameServer()->m_apPlayers[i]->GetCharacter()->GetPos()) < 400.0f)
+			return false;
+	}
+
+	return true;
+}
+
+int CCharacter::DoorCollision()
+{
+	if(DoorOpen())
+		return -1;
+	
+	for(int d = 0; d < ((CGameControllerEXP*)GameServer()->m_pController)->m_CurDoor; d++)
+	{
+		CDoor *pDoor = &((CGameControllerEXP*)GameServer()->m_pController)->m_aDoors[d];
+		if(!pDoor->m_Laser)
+			continue;
+		
+		vec2 Start = pDoor->m_Laser->m_From;
+		vec2 End = pDoor->m_Laser->GetPos();
+		
+		if(pDoor->m_Type == DOOR_TYPE_VERTICAL)
+		{
+			for(int y = Start.y; y < End.y; y += 3)
+			{
+				if(distance(m_Core.m_Pos, vec2(Start.x, y)) < 30.0f)
+					return DOOR_TYPE_VERTICAL;
+			}
+			if(distance(m_Core.m_Pos, End) < 30.0f)
+				return DOOR_TYPE_VERTICAL;
+		}
+		else if(pDoor->m_Type == DOOR_TYPE_HORIZONTAL)
+		{
+			for(int x = Start.x; x < End.x; x += 3)
+			{
+				if(distance(m_Core.m_Pos, vec2(x, Start.y)) < 30.0f)
+					return DOOR_TYPE_HORIZONTAL;
+			}
+			if(distance(m_Core.m_Pos, End) < 30.0f)
+				return DOOR_TYPE_HORIZONTAL;
+		}
+	}
+	
+	return -1;
+}
+
+void CCharacter::Teleport(vec2 To)
+{
+	GameServer()->CreatePlayerSpawn(m_Core.m_Pos);
+	GameServer()->CreatePlayerSpawn(To);
+	m_Core.m_Pos = To;
+	
+	//release his own hook
+	m_Core.m_HookedPlayer = -1;
+	m_Core.m_HookState = HOOK_RETRACTED;
+	m_Core.m_HookPos = m_Core.m_Pos;
+	
+	//release the hook of all the players which are hooking the teleported player
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(GameServer()->m_apPlayers[i] &&GameServer()->m_apPlayers[i]->GetCharacter())
+		{
+			CCharacterCore *c = &GameServer()->m_apPlayers[i]->GetCharacter()->m_Core;
+			if(c->m_HookedPlayer == m_pPlayer->GetCID())
+			{
+				c->m_HookedPlayer = -1;
+				c->m_HookState = HOOK_RETRACTED;
+				c->m_HookPos = m_Core.m_Pos;
+			}
+		}
+	}
+}
+
+void CCharacter::HandleBot()
+{
+	// Level 1: Use only hammer and gun, try to get your pos, stupid aim, with attack timer
+	// Level 2: Use only kamikaze
+	// Level 3: Use all weapons, good moves, good aim, without attack timer
+	
+	bool Jumping = (bool)m_Input.m_Jump;
+	m_Input.m_Direction = 0;
+	m_Input.m_Jump = 0;
+	m_LatestInput.m_Fire = 0;
+	m_Input.m_Fire = 0;
+	
+	CCharacter * TargetChr = GameServer()->m_World.ClosestCharacter(m_Pos, 700.0f, NULL, true);
+	if(!TargetChr)
+		return;
+	
+	if(m_pPlayer->m_BotLevel == 1)
+	{
+		//1) weapon :
+		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
+			m_QueuedWeapon = WEAPON_HAMMER;
+		else
+			m_QueuedWeapon = WEAPON_GUN;
+		
+		//2) move :
+		if(m_Pos.x < TargetChr->m_Pos.x)
+			m_Input.m_Direction = 1;
+		else if(m_Pos.x > TargetChr->m_Pos.x)
+			m_Input.m_Direction = -1;
+		vec2 FuturePos;
+		FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
+		FuturePos.y = m_Pos.y;
+		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+		{
+			if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
+				m_Input.m_Jump = 1;
+		}
+		
+		//3) aim :
+		Aim(TargetChr->m_Pos);
+		
+		if(!GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false))
+		{
+			//4) fire :
+			if(m_QueuedWeapon != m_ActiveWeapon)
+				return;
+			if(distance(TargetChr->m_Pos, m_Pos) < 500.0f
+				&& m_aWeapons[m_ActiveWeapon].m_Ammo != 0 && m_ReloadTimer == 0
+				&& (float)Server()->Tick() - m_AttackTimer > 0)
+			{
+				m_LatestInput.m_Fire = 1;
+				m_Input.m_Fire = 1;
+				m_AttackTimer = (float)Server()->Tick() + 0.4f*Server()->TickSpeed();
+			}
+		}
+	}
+	else if(m_pPlayer->m_BotLevel == 2)
+	{
+		//1) move :
+		if(m_Pos.x < TargetChr->m_Pos.x)
+			m_Input.m_Direction = 1;
+		else if(m_Pos.x > TargetChr->m_Pos.x)
+			m_Input.m_Direction = -1;
+		vec2 FuturePos;
+		FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
+		FuturePos.y = m_Pos.y;
+		if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+		{
+			if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
+				m_Input.m_Jump = 1;
+		}
+		
+		//2) aim :
+		Aim(TargetChr->m_Pos);
+
+		//3) fire :
+		if(distance(TargetChr->m_Pos, m_Pos) < 48.0f)
+		{
+			m_LatestInput.m_Fire = 1;
+			m_Input.m_Fire = 1;
+		}
+	}
+	else if(m_pPlayer->m_BotLevel == 3)
+	{
+		//1) weapon :
+		bool Shotgun = false;
+		if(m_aWeapons[WEAPON_SHOTGUN].m_Got && m_aWeapons[WEAPON_SHOTGUN].m_Ammo != 0)
+			Shotgun = true;
+			float d = distance(m_Pos, TargetChr->m_Pos);
+		if(d < 64)
+			m_QueuedWeapon = WEAPON_HAMMER;
+		else if(d < 480)
+		{
+			if(Shotgun)
+				m_QueuedWeapon = WEAPON_SHOTGUN;
+			else
+				m_QueuedWeapon = WEAPON_GUN;
+		}
+		else
+			m_QueuedWeapon = WEAPON_GUN;
+		
+		if(m_QueuedWeapon != m_ActiveWeapon)
+			return;
+	
+		//2) move :
+		if(GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false)) //no enemy visible, walk
+		{
+			if(m_Core.m_Vel.x > 0)
+				m_Input.m_Direction = 1;
+			else
+				m_Input.m_Direction = -1;
+			
+			//check for wall
+			vec2 FuturePos;
+			FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
+			FuturePos.y = m_Pos.y;
+			if(GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false))
+				m_Input.m_Direction *= -1;
+			Aim(FuturePos);
+		}
+		else
+		{
+			vec2 HisPos = TargetChr->m_Pos;
+			if(m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_HAMMER)
+			{
+				//keep him close
+				if(HisPos.x < m_Pos.x)
+					m_Input.m_Direction = -1;
+				else if(HisPos.x > m_Pos.x)
+					m_Input.m_Direction = 1;
+				Aim(TargetChr->m_Pos);
+				if(Server()->Tick()%10 == 0)
+					m_Input.m_Hook ^= 1;
+			}
+			
+			if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
+				m_Input.m_Jump = 1;
+		
+			//3) aim
+			bool Fire = false;
+			if(m_ActiveWeapon == WEAPON_HAMMER || m_ActiveWeapon == WEAPON_SHOTGUN)
+			{
+				Aim(TargetChr->m_Pos);
+				Fire = true;
+			}
+			else
+			{
+				vec2 TrgPos = TargetChr->m_Pos + TargetChr->m_Core.m_Vel;
+				float Angle = GetAngle(vec2(TrgPos.x-m_Pos.x, -(TrgPos.y-m_Pos.y)));
+				if(TargetChr->m_Pos.x < m_Pos.x)
+					Angle -= 1.25f*3 * 3.14159265358979/180.0f;
+				else
+					Angle += 1.25f*3 * 3.14159265358979/180.0f;
+				Aim(m_Pos + vec2(sinf(Angle), -cosf(Angle))*100);
+				Fire = true;
+			}
+			
+			//4) fire
+			if(Fire && m_ReloadTimer == 0 && (m_aWeapons[m_ActiveWeapon].m_Ammo == -1 || m_aWeapons[m_ActiveWeapon].m_Ammo > 0))
+			{
+				m_LatestInput.m_Fire = 1;
+				m_Input.m_Fire = 1;
+				m_AttackTimer = 1;
+			}
+		}
+	}
+	else if(m_pPlayer->m_BotLevel == 4)
+	{
+		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
+		
+		float d = distance(m_Pos, TargetChr->m_Pos);
+		if(d < 64.0f || (float)Server()->Tick() < pBoss->m_FreezerTimer)
+			m_ActiveWeapon = WEAPON_HAMMER;
+		else
+			m_ActiveWeapon = WEAPON_FREEZER;
+		
+		Aim(TargetChr->m_Pos);
+		
+		//if(m_QueuedWeapon != m_ActiveWeapon)
+		//	return;
+		
+		if(TargetChr->m_Frozen || d < 256.0f)
+		{
+			if(m_Pos.x < TargetChr->m_Pos.x)
+				m_Input.m_Direction = 1;
+			else if(m_Pos.x > TargetChr->m_Pos.x)
+				m_Input.m_Direction = -1;
+			vec2 FuturePos;
+			FuturePos.x = m_Pos.x + m_Input.m_Direction*100;
+			FuturePos.y = m_Pos.y;
+			if((GameServer()->Collision()->IntersectLine(m_Pos, FuturePos, NULL, NULL, false) || m_Pos.y > TargetChr->m_Pos.y) && !Jumping)
+			{
+				if(IsGrounded() || m_Core.m_Vel.y > -0.3f)
+					m_Input.m_Jump = 1;
+			}
+		}
+		
+		if(!GameServer()->Collision()->IntersectLine(m_Pos, TargetChr->m_Pos, NULL, NULL, false) && m_ReloadTimer == 0 && (m_aWeapons[m_ActiveWeapon].m_Ammo == -1 || m_aWeapons[m_ActiveWeapon].m_Ammo > 0))
+		{
+			m_LatestInput.m_Fire = 1;
+			m_Input.m_Fire = 1;
+			if(m_ActiveWeapon == WEAPON_FREEZER)
+				pBoss->m_FreezerTimer = (float)Server()->Tick() + 5.0f*Server()->TickSpeed();
+		}
+	}
+}
+
+void CCharacter::Aim(vec2 Target)
+{
+	Target -= m_Pos;
+	m_LatestInput.m_TargetX = Target.x;
+	m_LatestInput.m_TargetY = Target.y;
+	m_Input.m_TargetX = Target.x;
+	m_Input.m_TargetY = Target.y;
 }
