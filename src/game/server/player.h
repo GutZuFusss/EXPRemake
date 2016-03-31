@@ -128,6 +128,10 @@ public:
 	void LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller);
 	void GetWeapon(int wid);
 
+	// lil hack
+	CFlag *m_pClosestFlag;
+	int m_ClosestFlag;
+
 private:
 	CCharacter *m_pCharacter;
 	CGameContext *m_pGameServer;

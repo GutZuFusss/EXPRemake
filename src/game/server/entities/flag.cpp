@@ -85,10 +85,27 @@ void CFlag::TickPaused()
 
 void CFlag::Snap(int SnappingClient)
 {
+	// hack to fix the lagg bug on snapping more then one flag of the same color
+	if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->GetCharacter())
+	{
+		if(GameServer()->m_apPlayers[SnappingClient]->m_pClosestFlag != this)
+		{
+			if(distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos) < GameServer()->m_apPlayers[SnappingClient]->m_ClosestFlag)
+			{
+				GameServer()->m_apPlayers[SnappingClient]->m_pClosestFlag = this;
+				GameServer()->m_apPlayers[SnappingClient]->m_ClosestFlag = distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos);
+			}
+			else
+				return;
+		}
+		else
+			GameServer()->m_apPlayers[SnappingClient]->m_ClosestFlag = distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos);
+	}
+
 	if(m_Team == 0)
 	{
-		if(NetworkClipped(SnappingClient))
-			return;
+		//if(NetworkClipped(SnappingClient))
+		//	return;
 
 		//if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos) > 550)
 		//	return;
