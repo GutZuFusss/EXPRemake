@@ -442,7 +442,7 @@ void CGameContext::OnTick()
 	CheckPureTuning();
 
 	// send hints from time to time
-	if(Server()->Tick() % 180 * Server()->TickSpeed() == 0)
+	if(Server()->Tick() % (180 * Server()->TickSpeed()) == 0)
 	{
 		size_t n = rand()%(sizeof(s_apHints)/sizeof(s_apHints[0]));
 		SendChat(-1, CGameContext::CHAT_ALL, (char*)s_apHints[n]);
