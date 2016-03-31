@@ -79,11 +79,13 @@ void CPickup::Tick()
 		switch (m_Type)
 		{
 			case POWERUP_HEALTH:
-				if(pChr->IncreaseHealth(4))
+				if(pChr->IncreaseHealth(4) && !pPlayer->IsBot())
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 				}
+				else
+					return;
 				break;
 
 			case POWERUP_ARMOR:
@@ -99,18 +101,18 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_ArmorMax += 1;
 					pChr->m_Armor += 1;
 				}
+				else
+					return;
 				break;
 
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS)
 				{
-					if(pChr->GiveWeapon(m_Subtype, 10) && !pPlayer->IsBot())
+					if(pPlayer->GetWeapon(m_Subtype) && pChr->GiveWeapon(m_Subtype, 10) && !pPlayer->IsBot())
 					{
 						char aMsg[64];
 						str_format(aMsg, sizeof(aMsg), "Picked up: %s.", GetWeaponName(m_Subtype));
 						GameServer()->SendChatTarget(pPlayer->GetCID(), aMsg);
-						
-						pPlayer->GetWeapon(m_Subtype);
 
 						RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
@@ -124,6 +126,8 @@ void CPickup::Tick()
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
 					}
+					else
+						return;
 				}
 				break;
 
@@ -161,6 +165,8 @@ void CPickup::Tick()
 						
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 					}
+					else
+						return;
 				}
 				break;
 			
@@ -180,6 +186,8 @@ void CPickup::Tick()
 						
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 					}
+					else
+						return;
 				}
 				break;
 			
@@ -199,6 +207,8 @@ void CPickup::Tick()
 						
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 					}
+					else
+						return;
 				}
 				break;
 

@@ -439,13 +439,13 @@ void CPlayer::LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, 
 	m_GameExp.m_BossKiller = BKiller;
 }
 
-void CPlayer::GetWeapon(int WID)
+bool CPlayer::GetWeapon(int WID)
 {
 	if(m_GameExp.m_Weapons & (int)pow(2, WID))
-		return;
+		return false;
 	
 	if(WID == WEAPON_RIFLE && m_GameExp.m_Weapons & (int)pow(2, WEAPON_FREEZER))
-		return;
+		return false;
 	if(WID == WEAPON_FREEZER)
 	{
 		m_GameExp.m_Weapons &= ~(int)pow(2, WEAPON_RIFLE);
@@ -464,4 +464,6 @@ void CPlayer::GetWeapon(int WID)
 		else
 			m_pCharacter->m_aWeapons[WID].m_Ammo = g_pData->m_Weapons.m_aId[WID].m_Maxammo;
 	}
+
+	return true;
 }
