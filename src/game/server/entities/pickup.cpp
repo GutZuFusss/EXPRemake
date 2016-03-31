@@ -78,7 +78,7 @@ void CPickup::Tick()
 		switch (m_Type)
 		{
 			case POWERUP_HEALTH:
-				if(pChr->IncreaseHealth(4) && !pPlayer->IsBot())
+				if(!pPlayer->IsBot() && pChr->IncreaseHealth(4))
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 				}
