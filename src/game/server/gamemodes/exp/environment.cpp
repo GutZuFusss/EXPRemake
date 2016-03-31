@@ -270,7 +270,7 @@ void CGameControllerEXP::DestroyMine(int m)
 	m_aMines[m].m_Dead = true;
 	m_aMines[m].m_TimerRespawn = Server()->Tick();
 	
-	GameServer()->CreateExplosion(m_aMines[m].m_Pos, -1, WEAPON_WORLD, 5);
+	GameServer()->CreateExplosion(m_aMines[m].m_Pos, -1, WEAPON_WORLD, false);
 	GameServer()->CreateSound(m_aMines[m].m_Pos, SOUND_GRENADE_EXPLODE);
 }
 
