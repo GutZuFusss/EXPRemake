@@ -75,14 +75,12 @@ void CPickup::Tick()
 		CPlayer *pPlayer = pChr->GetPlayer();
 
 		// player picked us up, is someone was hooking us, let them go
-		int RespawnTime = -1;
 		switch (m_Type)
 		{
 			case POWERUP_HEALTH:
 				if(pChr->IncreaseHealth(4) && !pPlayer->IsBot())
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 				}
 				else
 					return;
@@ -97,7 +95,6 @@ void CPickup::Tick()
 						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: ARMOR.");
 
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
-					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 					pPlayer->m_GameExp.m_ArmorMax += 1;
 					pChr->m_Armor += 1;
 				}
@@ -108,13 +105,11 @@ void CPickup::Tick()
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS)
 				{
-					if(pPlayer->GetWeapon(m_Subtype) && pChr->GiveWeapon(m_Subtype, 10) && !pPlayer->IsBot())
+					if(pPlayer->GetWeapon(m_Subtype) && !pPlayer->IsBot())
 					{
 						char aMsg[64];
 						str_format(aMsg, sizeof(aMsg), "Picked up: %s.", GetWeaponName(m_Subtype));
 						GameServer()->SendChatTarget(pPlayer->GetCID(), aMsg);
-
-						RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
 						if(m_Subtype == WEAPON_GRENADE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
@@ -135,7 +130,6 @@ void CPickup::Tick()
 				{
 					// activate ninja on target player
 					pChr->GiveNinja();
-					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
 					// loop through all players, setting their emotes
 					CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
