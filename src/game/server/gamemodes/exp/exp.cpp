@@ -307,7 +307,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		
 		char aBuf[256] = {0};
 		if(GameServer()->m_apPlayers[ClientID]->m_GameExp.m_Weapons == 0)
-			str_format(aBuf, sizeof(aBuf), "Weapons: None", aBuf);
+			str_format(aBuf, sizeof(aBuf), "Weapons: none", aBuf);
 		for(int i = 1; i < NUM_WEAPONS+2; i++)
 		{
 			if(GameServer()->m_apPlayers[ClientID]->m_GameExp.m_Weapons & (int)pow(2, i))
@@ -318,10 +318,10 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		}
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
-		str_format(aBuf, sizeof(aBuf), "Armor : %d", GameServer()->m_apPlayers[ClientID]->m_GameExp.m_ArmorMax);
+		str_format(aBuf, sizeof(aBuf), "Armor: %d", GameServer()->m_apPlayers[ClientID]->m_GameExp.m_ArmorMax);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
-		str_format(aBuf, sizeof(aBuf), "Kills : %d", GameServer()->m_apPlayers[ClientID]->m_Score);
+		str_format(aBuf, sizeof(aBuf), "Kills: %d", GameServer()->m_apPlayers[ClientID]->m_Score);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -336,8 +336,8 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "1) Open the Local Console (F1).");
 		GameServer()->SendChatTarget(ClientID, "2) Type \"bind <key> say <item>\"");
 		GameServer()->SendChatTarget(ClientID, "Replace <key> by the key you want to press.");
-		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item : life, minor or greater.");
-		GameServer()->SendChatTarget(ClientID, "Example : \"bind l say life\"");
+		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: life, minor or greater.");
+		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say life\"");
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}

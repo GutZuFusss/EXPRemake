@@ -774,7 +774,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 
-	if(m_pPlayer->IsBot())
+	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
 	{
 		m_pPlayer->m_MustRemoveBot = true;
 		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_GUN)))
@@ -783,6 +783,9 @@ void CCharacter::Die(int Killer, int Weapon)
             GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
 			GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
 		}
+
+		if(GameServer()->m_apPlayers[Killer])
+			GameServer()->m_apPlayers[Killer]->m_Score++;
 
 		if(m_pPlayer->m_BotLevel == 4)
 		{
@@ -1093,7 +1096,7 @@ void CCharacter::Teleport(vec2 To)
 	//release the hook of all the players which are hooking the teleported player
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] &&GameServer()->m_apPlayers[i]->GetCharacter())
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter())
 		{
 			CCharacterCore *c = &GameServer()->m_apPlayers[i]->GetCharacter()->m_Core;
 			if(c->m_HookedPlayer == m_pPlayer->GetCID())
