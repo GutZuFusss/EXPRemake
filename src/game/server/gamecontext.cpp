@@ -319,7 +319,7 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_apPlayers[i])
+		if(m_apPlayers[i] && !m_apPlayers[i]->IsBot())
 		{
 			m_apPlayers[i]->m_Vote = 0;
 			m_apPlayers[i]->m_VotePos = 0;
@@ -469,7 +469,7 @@ void CGameContext::OnTick()
 				bool aVoteChecked[MAX_CLIENTS] = {0};
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
-					if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i])	// don't count in votes by spectators
+					if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[i]->IsBot() || aVoteChecked[i])	// don't count in votes by spectators
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
