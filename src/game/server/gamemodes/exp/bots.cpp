@@ -92,14 +92,14 @@ void CGameControllerEXP::TickBots()
 			
 			if(m_Boss.m_ShieldActive)
 			{
-				if(Server()->Tick() > m_Boss.m_RegenTimer)
+				/*if(Server()->Tick() > m_Boss.m_RegenTimer)
 				{
 					if(GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->m_Health < GameServer()->m_apPlayers[m_Boss.m_ClientID]->MaxHealth())
 					{
 						GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->m_Health++;
 						m_Boss.m_RegenTimer = Server()->Tick() + 1.0f*Server()->TickSpeed();
 					}
-				}
+				}*/
 				
 				vec2 BossPos = GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->GetPos();
 				vec2 BossVel = GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->m_Core.m_Vel;

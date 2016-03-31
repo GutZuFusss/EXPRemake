@@ -958,39 +958,42 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			SendEmoticon(ClientID, pMsg->m_Emoticon);
 
 			CCharacter* pChr = pPlayer->GetCharacter();
-			switch(pMsg->m_Emoticon)
+			if(pChr)
 			{
-			case EMOTICON_EXCLAMATION:
-			case EMOTICON_GHOST:
-			case EMOTICON_QUESTION:
-			case EMOTICON_WTF:
-					pChr->SetEmoteType(EMOTE_SURPRISE);
-					break;
-			case EMOTICON_DOTDOT:
-			case EMOTICON_DROP:
-			case EMOTICON_ZZZ:
-					pChr->SetEmoteType(EMOTE_BLINK);
-					break;
-			case EMOTICON_EYES:
-			case EMOTICON_HEARTS:
-			case EMOTICON_MUSIC:
-					pChr->SetEmoteType(EMOTE_HAPPY);
-					break;
-			case EMOTICON_OOP:
-			case EMOTICON_SORRY:
-			case EMOTICON_SUSHI:
-					pChr->SetEmoteType(EMOTE_PAIN);
-					break;
-			case EMOTICON_DEVILTEE:
-			case EMOTICON_SPLATTEE:
-			case EMOTICON_ZOMG:
-					pChr->SetEmoteType(EMOTE_ANGRY);
-					break;
-				default:
-					pChr->SetEmoteType(EMOTE_NORMAL);
-					break;
+				switch(pMsg->m_Emoticon)
+				{
+				case EMOTICON_EXCLAMATION:
+				case EMOTICON_GHOST:
+				case EMOTICON_QUESTION:
+				case EMOTICON_WTF:
+						pChr->SetEmoteType(EMOTE_SURPRISE);
+						break;
+				case EMOTICON_DOTDOT:
+				case EMOTICON_DROP:
+				case EMOTICON_ZZZ:
+						pChr->SetEmoteType(EMOTE_BLINK);
+						break;
+				case EMOTICON_EYES:
+				case EMOTICON_HEARTS:
+				case EMOTICON_MUSIC:
+						pChr->SetEmoteType(EMOTE_HAPPY);
+						break;
+				case EMOTICON_OOP:
+				case EMOTICON_SORRY:
+				case EMOTICON_SUSHI:
+						pChr->SetEmoteType(EMOTE_PAIN);
+						break;
+				case EMOTICON_DEVILTEE:
+				case EMOTICON_SPLATTEE:
+				case EMOTICON_ZOMG:
+						pChr->SetEmoteType(EMOTE_ANGRY);
+						break;
+					default:
+						pChr->SetEmoteType(EMOTE_NORMAL);
+						break;
+				}
+				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 			}
-			pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 		}
 		else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 		{

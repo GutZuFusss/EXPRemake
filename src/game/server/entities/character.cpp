@@ -425,7 +425,7 @@ void CCharacter::FireWeapon()
 
 		case WEAPON_KAMIKAZE:
 		{
-			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_KAMIKAZE, 25);
+			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_KAMIKAZE, false);
 			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
 			if(m_Alive)
 				Die(m_pPlayer->GetCID(), WEAPON_NINJA);

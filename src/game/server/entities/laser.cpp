@@ -18,7 +18,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_EvalTick = 0;
 	m_IsTurret = Turret;
 	m_TurretCollision = false;
-	m_IsFreezer = false;
+	m_IsFreezer = Freezer;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
