@@ -60,8 +60,8 @@ vec2 CProjectile::GetPos(float Time)
 
 void CProjectile::Tick()
 {
-	float Pt = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
-	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
+	float Pt = (Server()->Tick()-m_StartTick-1)/Server()->TickSpeed();
+	float Ct = (Server()->Tick()-m_StartTick)/Server()->TickSpeed();
 	vec2 PrevPos = GetPos(Pt);
 	vec2 CurPos = GetPos(Ct);
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &CurPos, 0);
@@ -130,7 +130,7 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 
 void CProjectile::Snap(int SnappingClient)
 {
-	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
+	float Ct = (Server()->Tick()-m_StartTick)/Server()->TickSpeed();
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;

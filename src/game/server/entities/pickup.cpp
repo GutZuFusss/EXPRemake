@@ -13,7 +13,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_FromDrop = false;
-	m_DieTimer = (float)Server()->Tick();
+	m_DieTimer = Server()->Tick();
 	m_IsBossShield = false;
 
 	m_Type = Type;
@@ -61,7 +61,7 @@ void CPickup::Tick()
 
 	if(m_FromDrop)
 	{
-		if((float)Server()->Tick() > m_DieTimer + GameServer()->Tuning()->m_PickupLifetime*Server()->TickSpeed())
+		if(Server()->Tick() > m_DieTimer + GameServer()->Tuning()->m_PickupLifetime*Server()->TickSpeed())
 		{
 			GameWorld()->DestroyEntity(this);
 			return;
@@ -220,7 +220,7 @@ void CPickup::Tick()
 
 	if(m_Type == POWERUP_MINOR_POTION || m_Type == POWERUP_GREATER_POTION)
 	{
-		if((float)Server()->Tick() > m_AnimationTimer)
+		if(Server()->Tick() > m_AnimationTimer)
 		{
 			int ID = -1;
 			for(int i = 0; i < g_Config.m_SvMaxClients; i++)
@@ -235,7 +235,7 @@ void CPickup::Tick()
 			GameServer()->CreateDeath(m_Pos, ID);
 			GameServer()->CreateDeath(m_Pos, -1);
 			float Sec = (m_Type == POWERUP_GREATER_POTION ? 0.3 : 0.5);
-			m_AnimationTimer = (float)Server()->Tick() + Sec*Server()->TickSpeed();
+			m_AnimationTimer = Server()->Tick() + Sec*Server()->TickSpeed();
 		}  
 	}
 }

@@ -35,27 +35,27 @@ void CGameControllerEXP::TickEnvironment()
 		{
 			if(GameServer()->Collision()->GetCollisionAt(GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().x, GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().y) & CCollision::COLFLAG_HEALING)
 			{
-				if((float)Server()->Tick() > GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer)
+				if(Server()->Tick() > GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer)
 				{
 					if(GameServer()->m_apPlayers[id]->GetCharacter()->m_Health < 10)
 					{
 						GameServer()->m_apPlayers[id]->GetCharacter()->m_Health++;
-						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = (float)Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
+						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
 					}
 					else if(GameServer()->m_apPlayers[id]->GetCharacter()->m_Armor < GameServer()->m_apPlayers[id]->m_GameExp.m_ArmorMax)
 					{
 						GameServer()->m_apPlayers[id]->GetCharacter()->m_Armor++;
-						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = (float)Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
+						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
 					}
 				}
 			}
 			
 			if(GameServer()->Collision()->GetCollisionAt(GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().x, GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().y) & CCollision::COLFLAG_POISON)
 			{
-				if((float)Server()->Tick() > GameServer()->m_apPlayers[id]->m_GameExp.m_PoisonTimer)
+				if(Server()->Tick() > GameServer()->m_apPlayers[id]->m_GameExp.m_PoisonTimer)
 				{
 					GameServer()->m_apPlayers[id]->GetCharacter()->TakeDamage(vec2(0, 0), 1, -1, WEAPON_WORLD);
-					GameServer()->m_apPlayers[id]->m_GameExp.m_PoisonTimer = (float)Server()->Tick() + GameServer()->Tuning()->m_PoisonTimer*Server()->TickSpeed();
+					GameServer()->m_apPlayers[id]->m_GameExp.m_PoisonTimer = Server()->Tick() + GameServer()->Tuning()->m_PoisonTimer*Server()->TickSpeed();
 				}
 			}
 		}
@@ -69,7 +69,7 @@ void CGameControllerEXP::TickEnvironment()
 		
 		if(m_aMines[m].m_Dead)
 		{
-			if((float)Server()->Tick() > m_aMines[m].m_TimerRespawn + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
+			if(Server()->Tick() > m_aMines[m].m_TimerRespawn + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
 				BuildMine(m);
 		}
 		else
@@ -116,7 +116,7 @@ void CGameControllerEXP::TickEnvironment()
 	{
 		if(!m_aTraps[t].m_Used)
 			continue;
-		if((float)Server()->Tick() < m_aTraps[t].m_Timer)
+		if(Server()->Tick() < m_aTraps[t].m_Timer)
 			continue;
 		
 		CCharacter *apCloseChars[MAX_CLIENTS];
@@ -128,7 +128,7 @@ void CGameControllerEXP::TickEnvironment()
 			if(apCloseChars[i]->GetPos().y > m_aTraps[t].m_Pos.y && apCloseChars[i]->GetPos().x > m_aTraps[t].m_Pos.x-64 && apCloseChars[i]->GetPos().x < m_aTraps[t].m_Pos.x+64)
 			{
 				new CProjectile(&GameServer()->m_World, WEAPON_GRENADE, -1, m_aTraps[t].m_Pos, vec2(0, 1), (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime), 5, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
-				m_aTraps[t].m_Timer = (float)Server()->Tick() + g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Firedelay*Server()->TickSpeed()/1000.0f;
+				m_aTraps[t].m_Timer = Server()->Tick() + g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Firedelay*Server()->TickSpeed()/1000.0f;
 				GameServer()->CreateSound(m_aTraps[t].m_Pos, SOUND_GRENADE_FIRE);
 				break;
 			}
@@ -143,14 +143,14 @@ void CGameControllerEXP::TickEnvironment()
 		
 		if(m_aTurrets[t].m_Dead)
 		{
-			if((float)Server()->Tick() > m_aTurrets[t].m_TimerRespawn + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
+			if(Server()->Tick() > m_aTurrets[t].m_TimerRespawn + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
 				BuildTurret(t);
 			continue;
 		}
 		
 		if(m_aTurrets[t].m_Frozen)
 		{
-			if((float)Server()->Tick() > m_aTurrets[t].m_FrozenTimer)
+			if(Server()->Tick() > m_aTurrets[t].m_FrozenTimer)
 				m_aTurrets[t].m_Frozen = false;
 		}
 		
@@ -171,7 +171,7 @@ void CGameControllerEXP::TickEnvironment()
 				
 				vec2 Direction = normalize(apCloseChars[i]->GetPos()-m_aTurrets[t].m_Pos);
 				new CLaser(&GameServer()->m_World, m_aTurrets[t].m_Pos, Direction, GameServer()->Tuning()->m_TurretLaserRadius, -1, true, false);
-				m_aTurrets[t].m_Timer = (float)Server()->Tick() + GameServer()->Tuning()->m_TurretReload*Server()->TickSpeed();
+				m_aTurrets[t].m_Timer = Server()->Tick() + GameServer()->Tuning()->m_TurretReload*Server()->TickSpeed();
 				GameServer()->CreateSound(m_aTurrets[t].m_Pos, SOUND_RIFLE_FIRE);
 				
 				break;
@@ -193,7 +193,7 @@ void CGameControllerEXP::TickEnvironment()
 				
 				vec2 Direction = normalize(apCloseChars[i]->GetPos()-m_aTurrets[t].m_Pos);
 				new CProjectile(&GameServer()->m_World, WEAPON_GUN, -1, m_aTurrets[t].m_Pos, Direction, (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime), 1, 0, 0, -1, WEAPON_GUN);
-				m_aTurrets[t].m_Timer = (float)Server()->Tick() + GameServer()->Tuning()->m_TurretReload*Server()->TickSpeed();
+				m_aTurrets[t].m_Timer = Server()->Tick() + GameServer()->Tuning()->m_TurretReload*Server()->TickSpeed();
 				GameServer()->CreateSound(m_aTurrets[t].m_Pos, SOUND_GUN_FIRE);
 				
 				break;
@@ -240,7 +240,7 @@ void CGameControllerEXP::DestroyTurret(int t, int Killer)
 	m_aTurrets[t].m_Dead = true;
 	m_aTurrets[t].m_Life = 0;
 	m_aTurrets[t].m_Timer = 0.0f;
-	m_aTurrets[t].m_TimerRespawn = (float)Server()->Tick();
+	m_aTurrets[t].m_TimerRespawn = Server()->Tick();
 	
 	GameServer()->m_apPlayers[Killer]->m_Score++;
 	
@@ -256,7 +256,7 @@ void CGameControllerEXP::DestroyTurret(int t, int Killer)
 void CGameControllerEXP::FreezeTurret(int t)
 {
 	m_aTurrets[t].m_Frozen = true;
-	m_aTurrets[t].m_FrozenTimer = (float)Server()->Tick() + 5.0f*Server()->TickSpeed();
+	m_aTurrets[t].m_FrozenTimer = Server()->Tick() + 5.0f*Server()->TickSpeed();
 }
 
 void CGameControllerEXP::BuildMine(int m)
@@ -268,7 +268,7 @@ void CGameControllerEXP::BuildMine(int m)
 void CGameControllerEXP::DestroyMine(int m)
 {
 	m_aMines[m].m_Dead = true;
-	m_aMines[m].m_TimerRespawn = (float)Server()->Tick();
+	m_aMines[m].m_TimerRespawn = Server()->Tick();
 	
 	GameServer()->CreateExplosion(m_aMines[m].m_Pos, -1, WEAPON_WORLD, 5);
 	GameServer()->CreateSound(m_aMines[m].m_Pos, SOUND_GRENADE_EXPLODE);

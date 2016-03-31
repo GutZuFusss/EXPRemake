@@ -12,7 +12,7 @@ struct CBotSpawn
 	vec2 m_Pos;
 	int m_Level;
 	bool m_Spawned;
-	float m_RespawnTimer;
+	int m_RespawnTimer;
 };
 
 struct CBoss

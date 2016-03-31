@@ -39,11 +39,11 @@ void CGameControllerEXP::TickBots()
 		{
 			if(p->m_NobodyTimer == 0)
 			{
-				p->m_NobodyTimer = (float)Server()->Tick() + 10.0f*Server()->TickSpeed();
+				p->m_NobodyTimer = Server()->Tick() + 10.0f*Server()->TickSpeed();
 			}
 			else
 			{
-				if((float)Server()->Tick() > p->m_NobodyTimer)
+				if(Server()->Tick() > p->m_NobodyTimer)
 					RemoveBot(b, false);
 			}
 		}
@@ -63,7 +63,7 @@ void CGameControllerEXP::TickBots()
 			CBotSpawn *pSpawn = &m_aaBotSpawns[l][s];
 			if(pSpawn->m_Spawned)
 				continue;
-			if((float)Server()->Tick() < pSpawn->m_RespawnTimer + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
+			if(Server()->Tick() < pSpawn->m_RespawnTimer + GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed())
 				continue;
 			
 			for(int p = 0; p < g_Config.m_SvMaxClients; p++)
@@ -92,12 +92,12 @@ void CGameControllerEXP::TickBots()
 			
 			if(m_Boss.m_ShieldActive)
 			{
-				if((float)Server()->Tick() > m_Boss.m_RegenTimer)
+				if(Server()->Tick() > m_Boss.m_RegenTimer)
 				{
 					if(GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->m_Health < GameServer()->m_apPlayers[m_Boss.m_ClientID]->MaxHealth())
 					{
 						GameServer()->m_apPlayers[m_Boss.m_ClientID]->GetCharacter()->m_Health++;
-						m_Boss.m_RegenTimer = (float)Server()->Tick() + 1.0f*Server()->TickSpeed();
+						m_Boss.m_RegenTimer = Server()->Tick() + 1.0f*Server()->TickSpeed();
 					}
 				}
 				
@@ -113,7 +113,7 @@ void CGameControllerEXP::TickBots()
 			}
 			else
 			{
-				if((float)Server()->Tick() > m_Boss.m_ShieldTimer)
+				if(Server()->Tick() > m_Boss.m_ShieldTimer)
 				{
 					m_Boss.m_ShieldActive = true;
 					m_Boss.m_ShieldHealth = 18;
@@ -170,7 +170,7 @@ void CGameControllerEXP::BotSpawn(CBotSpawn *pSpawn)
 	{
 		m_Boss.m_ClientID = BID;
 		m_Boss.m_ShieldActive = false;
-		m_Boss.m_ShieldTimer = (float)Server()->Tick() - 1;
+		m_Boss.m_ShieldTimer = Server()->Tick() - 1;
 	}
 }
 
@@ -178,7 +178,7 @@ void CGameControllerEXP::RemoveBot(int ID, bool Killed)
 {
 	GameServer()->m_apPlayers[ID]->m_pBotSpawn->m_Spawned = false;
 	if(Killed)
-		GameServer()->m_apPlayers[ID]->m_pBotSpawn->m_RespawnTimer = (float)Server()->Tick();
+		GameServer()->m_apPlayers[ID]->m_pBotSpawn->m_RespawnTimer = Server()->Tick();
 	
 	if(Killed)
 	{

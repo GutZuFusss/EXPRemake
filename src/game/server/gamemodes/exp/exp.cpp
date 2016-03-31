@@ -75,17 +75,17 @@ void CGameControllerEXP::Tick()
 			else
 			{
 				// REGEN
-				if((float)Server()->Tick() > apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed())
+				if(Server()->Tick() > apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed())
 				{
 					if(apCloseCharacters[i]->m_Health < 10) //regen health
 					{
 						apCloseCharacters[i]->m_Health++;
-						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = (float)Server()->Tick();
+						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
 					}
 					else if(apCloseCharacters[i]->m_Armor < apCloseCharacters[i]->GetPlayer()->m_GameExp.m_ArmorMax) //regen armor
 					{
 						apCloseCharacters[i]->m_Armor++;
-						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = (float)Server()->Tick();
+						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
 					}
 					else // regen ammo
 					{
@@ -96,7 +96,7 @@ void CGameControllerEXP::Tick()
 							if(apCloseCharacters[i]->m_aWeapons[WID].m_Ammo < MaxAmmo)
 							{
 								apCloseCharacters[i]->m_aWeapons[WID].m_Ammo++;
-								apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = (float)Server()->Tick();
+								apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
 							}
 						}
 					}
@@ -107,7 +107,7 @@ void CGameControllerEXP::Tick()
 				{
 					apCloseCharacters[i]->GetPlayer()->m_GameExp.m_LastFlag = fi+1;
 					GameServer()->SendChatTarget(apCloseCharacters[i]->GetPlayer()->GetCID(), "Checkpoint reached.");
-					//apCloseCharacters[i]->GetPlayer()->m_GameExp.m_SaveTimer = (float)Server()->Tick() + 5.0f*Server()->TickSpeed();
+					//apCloseCharacters[i]->GetPlayer()->m_GameExp.m_SaveTimer = Server()->Tick() + 5.0f*Server()->TickSpeed();
 				}
 			}
 		}
@@ -132,7 +132,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Pos = Pos;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Level = lvl;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Spawned = false;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() + 2*Server()->Tick();
+		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
 		m_aNumBotSpawns[lvl-1]++;
 	}
 	if(Index == ENTITY_SPAWN_BOSS)
@@ -146,7 +146,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 			m_Boss.m_Spawn.m_Pos = Pos;
 			m_Boss.m_Spawn.m_Level = 4;
 			m_Boss.m_Spawn.m_Spawned = false;
-			m_Boss.m_Spawn.m_RespawnTimer = (float)Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->Tick();
+			m_Boss.m_Spawn.m_RespawnTimer = Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed();
 		}
 	}
 	else if(Index == ENTITY_TURRET_LASER)
@@ -414,7 +414,7 @@ void CGameControllerEXP::RestartClient(int ID)
 void CGameControllerEXP::UpdateGame(int ID)
 {
 	int DiffTick = Server()->Tick() - GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick;
-	GameServer()->m_apPlayers[ID]->m_GameExp.m_Time += (int) (DiffTick / (float)Server()->TickSpeed());
+	GameServer()->m_apPlayers[ID]->m_GameExp.m_Time += (int) (DiffTick / Server()->TickSpeed());
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick = Server()->Tick();
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills = GameServer()->m_apPlayers[ID]->m_Score;
 }

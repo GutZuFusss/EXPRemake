@@ -131,7 +131,7 @@ void CLaser::Tick()
 	}
 	
 	if(m_TurretCollision)
-		m_TurretHitTimer = (float)Server()->Tick() + 0.1f*Server()->TickSpeed();
+		m_TurretHitTimer = Server()->Tick() + 0.1f*Server()->TickSpeed();
 
 	if(Server()->Tick() > m_EvalTick+(Server()->TickSpeed()*GameServer()->Tuning()->m_LaserBounceDelay)/1000.0f)
 		DoBounce();

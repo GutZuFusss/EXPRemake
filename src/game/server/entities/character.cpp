@@ -329,7 +329,7 @@ void CCharacter::FireWeapon()
 				Hits++;
 
 				if(apEnts[i]->m_Frozen && GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), apEnts[i]->GetPlayer()->GetCID()))
-					apEnts[i]->m_FrozenTimer = (float)Server()->Tick() - 1;
+					apEnts[i]->m_FrozenTimer = Server()->Tick() - 1;
 			}
 
 			// TURRETS COLLISION
@@ -576,7 +576,7 @@ void CCharacter::Tick()
 	}
 
 	m_pPlayer->m_LastPos = m_Pos;
-	if(m_Frozen && (float)Server()->Tick() > m_FrozenTimer)
+	if(m_Frozen && Server()->Tick() > m_FrozenTimer)
 	{
 		m_Frozen = false;
 		m_aWeapons[WEAPON_NINJA].m_Got = false;
@@ -833,7 +833,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 			if(pBoss->m_ShieldHealth <= 0)
 			{
 				pBoss->m_ShieldActive = false;
-				pBoss->m_ShieldTimer = (float)Server()->Tick() + 15.0f*Server()->TickSpeed();
+				pBoss->m_ShieldTimer = Server()->Tick() + 15.0f*Server()->TickSpeed();
 				GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
 				GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
 			}
@@ -1006,7 +1006,7 @@ void CCharacter::Snap(int SnappingClient)
 void CCharacter::Freeze()
 {
 	m_Frozen = true;
-	m_FrozenTimer = (float)Server()->Tick() + GameServer()->Tuning()->m_FreezerTimer*Server()->TickSpeed();
+	m_FrozenTimer = Server()->Tick() + GameServer()->Tuning()->m_FreezerTimer*Server()->TickSpeed();
 	
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
@@ -1018,7 +1018,7 @@ void CCharacter::Freeze()
 	{
 		CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
 		pBoss->m_ShieldHealth = 0;
-		pBoss->m_ShieldTimer = (float)Server()->Tick() + 15.0f*Server()->TickSpeed();
+		pBoss->m_ShieldTimer = Server()->Tick() + 15.0f*Server()->TickSpeed();
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
 		GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
 	}
@@ -1154,11 +1154,11 @@ void CCharacter::HandleBot()
 				return;
 			if(distance(TargetChr->m_Pos, m_Pos) < 500.0f
 				&& m_aWeapons[m_ActiveWeapon].m_Ammo != 0 && m_ReloadTimer == 0
-				&& (float)Server()->Tick() - m_AttackTimer > 0)
+				&& Server()->Tick() - m_AttackTimer > 0)
 			{
 				m_LatestInput.m_Fire = 1;
 				m_Input.m_Fire = 1;
-				m_AttackTimer = (float)Server()->Tick() + 0.4f*Server()->TickSpeed();
+				m_AttackTimer = Server()->Tick() + 0.4f*Server()->TickSpeed();
 			}
 		}
 	}
@@ -1277,7 +1277,7 @@ void CCharacter::HandleBot()
 		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
 		
 		float d = distance(m_Pos, TargetChr->m_Pos);
-		if(d < 64.0f || (float)Server()->Tick() < pBoss->m_FreezerTimer)
+		if(d < 64.0f || Server()->Tick() < pBoss->m_FreezerTimer)
 			m_ActiveWeapon = WEAPON_HAMMER;
 		else
 			m_ActiveWeapon = WEAPON_FREEZER;
@@ -1308,7 +1308,7 @@ void CCharacter::HandleBot()
 			m_LatestInput.m_Fire = 1;
 			m_Input.m_Fire = 1;
 			if(m_ActiveWeapon == WEAPON_FREEZER)
-				pBoss->m_FreezerTimer = (float)Server()->Tick() + 5.0f*Server()->TickSpeed();
+				pBoss->m_FreezerTimer = Server()->Tick() + 5.0f*Server()->TickSpeed();
 		}
 	}
 }

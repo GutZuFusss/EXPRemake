@@ -118,8 +118,8 @@ public:
 		int m_LastFlag;
 		int m_ArmorMax;
 		int m_Weapons;
-		float m_RegenTimer; //ticks
-		float m_PoisonTimer; //ticks
+		int m_RegenTimer; //ticks
+		int m_PoisonTimer; //ticks
 		CItems m_Items;
 		bool m_BossHitter;
 		bool m_BossKiller;
