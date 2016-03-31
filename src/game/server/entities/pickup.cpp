@@ -110,7 +110,7 @@ void CPickup::Tick()
 						str_format(aMsg, sizeof(aMsg), "Picked up: %s.", GetWeaponName(m_Subtype));
 						GameServer()->SendChatTarget(pPlayer->GetCID(), aMsg);
 						
-						pPlayer->GetWeapon(WEAPON_GRENADE);
+						pPlayer->GetWeapon(m_Subtype);
 
 						RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
