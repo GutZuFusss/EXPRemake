@@ -426,10 +426,27 @@ void CGameContext::SwapTeams()
 	(void)m_pController->CheckTeamBalance();
 }
 
+static const char *s_apHints[] = {
+		"If you don't progress, try to kill monsters and turrets to obtain stronger items.",
+		"Sometimes it is smart to just rush to a flag/checkpoint.",
+		"The blue finish flag will spawn after you kill the boss (if there is one on the map).",
+		"Teaming up with other tees is definetly a good idea!",
+		"You may restart your game by typing \"/new\".",
+		"Check out \"/cmdlist\"!",
+		"\"/game\" Show your weapons, kills, armor and so on!"
+};
+
 void CGameContext::OnTick()
 {
 	// check tuning
 	CheckPureTuning();
+
+	// send hints from time to time
+	if(Server()->Tick() % 180 * Server()->TickSpeed() == 0)
+	{
+		size_t n = rand()%(sizeof(s_apHints)/sizeof(s_apHints[0]));
+		SendChat(-1, CGameContext::CHAT_ALL, (char*)s_apHints[n]);
+	}
 
 	// copy tuning
 	m_World.m_Core.m_Tuning = m_Tuning;
