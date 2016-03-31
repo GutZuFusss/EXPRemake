@@ -46,6 +46,7 @@ void CPlayer::Tick()
 	Server()->SetClientScore(m_ClientID, m_Score);
 
 	// do latency stuff
+	if(!IsBot())
 	{
 		IServer::CClientInfo Info;
 		if(Server()->GetClientInfo(m_ClientID, &Info))
@@ -64,6 +65,12 @@ void CPlayer::Tick()
 			m_Latency.m_AccumMin = 1000;
 			m_Latency.m_AccumMax = 0;
 		}
+	}
+	else
+	{
+		m_Latency.m_Avg = 420;
+		m_Latency.m_Max = 420;
+		m_Latency.m_Min = 420;
 	}
 
 	if(!GameServer()->m_World.m_Paused)
