@@ -77,6 +77,9 @@ public:
 	void HandleBot();
 	void Aim(vec2 Target);
 
+	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
+	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
+
 	// moved to public
 	int m_Health;
 	int m_Armor;
