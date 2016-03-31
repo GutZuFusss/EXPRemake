@@ -132,8 +132,9 @@ public:
 	CFlag *m_pClosestFlag;
 	int m_ClosestFlag;
 
-private:
 	CCharacter *m_pCharacter;
+
+private:
 	CGameContext *m_pGameServer;
 
 	CGameContext *GameServer() const { return m_pGameServer; }

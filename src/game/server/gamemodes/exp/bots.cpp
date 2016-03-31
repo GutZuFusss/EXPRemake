@@ -186,7 +186,8 @@ void CGameControllerEXP::RemoveBot(int ID, bool Killed)
 		pPickup->CreateRandomFromBot(GameServer()->m_apPlayers[ID]->m_BotLevel, GameServer()->m_apPlayers[ID]->m_LastPos);
 	}
 	
-	//delete GameServer()->m_apPlayers[ID]->GetCharacter();
+	delete GameServer()->m_apPlayers[ID]->m_pCharacter;
+	GameServer()->m_apPlayers[ID]->m_pCharacter = NULL;
 	//GameServer()->m_apPlayers[ID]->character = NULL;
 	delete GameServer()->m_apPlayers[ID];
 	GameServer()->m_apPlayers[ID] = NULL;
