@@ -333,14 +333,24 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(!pName)
 		return;
 
-	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, sizeof(aNameTry));
-	if(TrySetClientName(ClientID, aNameTry))
+	char aCleanName[MAX_NAME_LENGTH];
+	str_copy(aCleanName, pName, sizeof(aCleanName));
+
+	if (!g_Config.m_SvAllowUTF8Names)
+		// clear name
+		for(char *p = aCleanName; *p; ++p)
+		{
+			if(*p < 32)
+				*p = ' ';
+		}
+
+	if(TrySetClientName(ClientID, aCleanName))
 	{
 		// auto rename
 		for(int i = 1;; i++)
 		{
-			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, pName);
+			char aNameTry[MAX_NAME_LENGTH];
+			str_format(aNameTry, sizeof(aCleanName), "(%d)%s", i, aCleanName);
 			if(TrySetClientName(ClientID, aNameTry) == 0)
 				break;
 		}
