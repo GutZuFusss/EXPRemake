@@ -60,8 +60,8 @@ vec2 CProjectile::GetPos(float Time)
 
 void CProjectile::Tick()
 {
-	float Pt = (Server()->Tick()-m_StartTick-1)/Server()->TickSpeed();
-	float Ct = (Server()->Tick()-m_StartTick)/Server()->TickSpeed();
+	float Pt = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
+	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
 	vec2 PrevPos = GetPos(Pt);
 	vec2 CurPos = GetPos(Ct);
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &CurPos, 0);
@@ -70,7 +70,7 @@ void CProjectile::Tick()
 
 	m_LifeSpan--;
 
-	bool TurretDamage = false;
+	bool TurretColl = false;
 	
 	// TURRETS COLLISION
 	if(m_Owner >= 0 && GameServer()->m_apPlayers[m_Owner] && !GameServer()->m_apPlayers[m_Owner]->IsBot())
@@ -93,12 +93,12 @@ void CProjectile::Tick()
 					if(Dmg)
 						((CGameControllerEXP*)GameServer()->m_pController)->HitTurret(b, m_Owner, (int)(m_Damage+m_Force));
 				}
-				TurretDamage = true;
+				TurretColl = true;
 			}
 		}
 	}
 
-	if(TargetChr || Collide || m_LifeSpan < 0 || GameLayerClipped(CurPos))
+	if(TargetChr || Collide || m_LifeSpan < 0 || TurretColl || GameLayerClipped(CurPos))
 	{
 		if(m_LifeSpan >= 0 || m_Weapon == WEAPON_GRENADE)
 			GameServer()->CreateSound(CurPos, m_SoundImpact);
@@ -130,7 +130,7 @@ void CProjectile::FillInfo(CNetObj_Projectile *pProj)
 
 void CProjectile::Snap(int SnappingClient)
 {
-	float Ct = (Server()->Tick()-m_StartTick)/Server()->TickSpeed();
+	float Ct = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
