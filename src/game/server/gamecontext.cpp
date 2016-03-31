@@ -867,6 +867,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->GetTeam() == pMsg->m_Team || (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam+Server()->TickSpeed()*3 > Server()->Tick()))
 				return;
 
+			if(pMsg->m_Team == TEAM_BLUE)
+			{
+				SendBroadcast("You can't join the monster's team!", ClientID);
+				return;
+			}
+
 			if(pMsg->m_Team != TEAM_SPECTATORS && m_LockTeams)
 			{
 				pPlayer->m_LastSetTeam = Server()->Tick();
