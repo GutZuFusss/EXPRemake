@@ -132,7 +132,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Pos = Pos;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Level = lvl;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Spawned = false;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = (float)Server()->Tick() - 5*Server()->Tick();
+		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() + 2*Server()->Tick();
 		m_aNumBotSpawns[lvl-1]++;
 	}
 	if(Index == ENTITY_SPAWN_BOSS)

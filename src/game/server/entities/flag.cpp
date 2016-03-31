@@ -101,6 +101,8 @@ void CFlag::Snap(int SnappingClient)
 		else
 			GameServer()->m_apPlayers[SnappingClient]->m_ClosestFlag = distance(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos(), m_Pos);
 	}
+	else
+		return;
 
 	if(m_Team == 0)
 	{
