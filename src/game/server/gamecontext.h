@@ -181,6 +181,7 @@ public:
 	CSql *m_pDatabase;
 	void SaveRank(const char *pMap, const char *pName, int Time, int Kills);
 	void Top5(const char *pMap, int ClientID);
+	void Rank(const char *pMap, const char *pName, int ClientID);
 };
 
 class CQueryBase : public CQuery
@@ -191,6 +192,12 @@ public:
 };
 
 class CQueryTop5: public CQueryBase
+{
+	void OnData();
+public:
+};
+
+class CQueryRank: public CQueryBase
 {
 	void OnData();
 public:

@@ -277,6 +277,11 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->Top5(g_Config.m_SvMap, ClientID);
 		return true;
 	}
+	else if(!strncmp(aMsg, "/rank", 5))
+	{
+		GameServer()->Rank(g_Config.m_SvMap, Server()->ClientName(ClientID), ClientID);
+		return true;
+	}
 	else if(!strncmp(aMsg, "/cmdlist", 8) || !strncmp(aMsg, "/cmd", 4))
 	{
 		GameServer()->SendChatTarget(ClientID, " ");
@@ -284,6 +289,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "                                    COMMAND LIST");
 		GameServer()->SendChatTarget(ClientID, "");
 		GameServer()->SendChatTarget(ClientID, "'/info': Get info about the modification.");
+		GameServer()->SendChatTarget(ClientID, "'/top5': View the top 5 players.");
 		GameServer()->SendChatTarget(ClientID, "'/items': Get info about the items.");
 		GameServer()->SendChatTarget(ClientID, "'/new': Restart the game.");
 		GameServer()->SendChatTarget(ClientID, "'/bind': Learn how to bind a key to use an item.");
@@ -296,7 +302,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		GameServer()->SendChatTarget(ClientID, "                                           ITEMS");
 		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "Checkout '/bind' to learn how to bind items.");
+		GameServer()->SendChatTarget(ClientID, "Check out '/bind' to learn how to bind items.");
 		GameServer()->SendChatTarget(ClientID, "Weapons: You keep it when you have it.");
 		GameServer()->SendChatTarget(ClientID, "Life: You can use it to respawn where you died.");
 		GameServer()->SendChatTarget(ClientID, "Minor Potion: Use it to get full health.");
