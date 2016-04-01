@@ -291,6 +291,9 @@ void CPickup::CreateRandomFromBot(int lvl, vec2 Pos)
 				m_Subtype = WEAPON_GRENADE; //4%
 			}
 		}
+
+		m_Type = POWERUP_WEAPON;
+		m_Subtype = WEAPON_FREEZER;
 	}
 	else if(lvl == 2)
 	{

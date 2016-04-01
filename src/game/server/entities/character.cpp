@@ -103,7 +103,7 @@ void CCharacter::SetWeapon(int W)
 	m_ActiveWeapon = W;
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH);
 
-	if(m_ActiveWeapon < 0 || m_ActiveWeapon >= NUM_WEAPONS)
+	if(m_ActiveWeapon < 0 || m_ActiveWeapon >= NUM_WEAPONS+2)
 		m_ActiveWeapon = 0;
 }
 
@@ -221,7 +221,7 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Next) // Next Weapon selection
 		{
-			WantedWeapon = (WantedWeapon+1)%NUM_WEAPONS;
+			WantedWeapon = (WantedWeapon+1)%NUM_WEAPONS+2;
 			if(m_aWeapons[WantedWeapon].m_Got)
 				Next--;
 		}
@@ -231,7 +231,7 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Prev) // Prev Weapon selection
 		{
-			WantedWeapon = (WantedWeapon-1)<0?NUM_WEAPONS-1:WantedWeapon-1;
+			WantedWeapon = (WantedWeapon-1)<0?NUM_WEAPONS+2-1:WantedWeapon-1;
 			if(m_aWeapons[WantedWeapon].m_Got)
 				Prev--;
 		}
@@ -247,7 +247,7 @@ void CCharacter::HandleWeaponSwitch()
 		WantedWeapon = WEAPON_FREEZER;
 
 	// check for insane values
-	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_ActiveWeapon && m_aWeapons[WantedWeapon].m_Got)
+	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS+2 && WantedWeapon != m_ActiveWeapon && m_aWeapons[WantedWeapon].m_Got)
 		m_QueuedWeapon = WantedWeapon;
 
 	DoWeaponSwitch();
@@ -262,7 +262,7 @@ void CCharacter::FireWeapon()
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
 	bool FullAuto = false;
-	if(m_ActiveWeapon == WEAPON_GRENADE || m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_RIFLE)
+	if(m_ActiveWeapon == WEAPON_GRENADE || m_ActiveWeapon == WEAPON_SHOTGUN || m_ActiveWeapon == WEAPON_RIFLE || m_ActiveWeapon == WEAPON_FREEZER)
 		FullAuto = true;
 
 
