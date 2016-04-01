@@ -143,6 +143,8 @@ function build(settings)
 	--settings.objdir = Path("objs")
 	settings.cc.Output = Intermediate_Output
 
+	settings.link.flags:Add("-ldl")
+
 	if config.compiler.driver == "cl" then
 		settings.cc.flags:Add("/wd4244")
 	else

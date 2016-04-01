@@ -179,6 +179,20 @@ public:
 
 	// - SQL
 	CSql *m_pDatabase;
+	void SaveRank(const char *pName, int Time, int Kills);
+};
+
+class CQueryPlayer : public CQuery
+{
+public:
+	int m_ClientID;
+	CGameContext *m_pGameServer;
+};
+
+class CQuerySave: public CQueryPlayer
+{
+	void OnData();
+public:
 };
 
 inline int CmaskAll() { return -1; }

@@ -1677,3 +1677,11 @@ const char *CGameContext::Version() { return GAME_VERSION; }
 const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
+
+void CGameContext::SaveRank(const char *pName, int Time, int Kills)
+{
+	char *pQueryBuf = sqlite3_mprintf("INSERT INTO Saves (Name, Time, Kills) VALUES ('%q', '%d', '%d');", pName, Time, Kills);
+	CQuery *pQuery = new CQuery();
+	pQuery->Query(m_pDatabase, pQueryBuf);
+	sqlite3_free(pQueryBuf);
+}
