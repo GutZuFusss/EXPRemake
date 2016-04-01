@@ -382,6 +382,9 @@ int CPlayer::MaxArmor()
 
 const char *CPlayer::GetMonsterName()
 {
+	if(!m_pCharacter)
+		return "R.I.P.";
+
 	int Life = m_pCharacter->m_Health + m_pCharacter->m_Armor;
 	int MaxLife = MaxHealth() + MaxArmor();
 	float coef = (float)Life / (float)MaxLife;
@@ -461,6 +464,7 @@ bool CPlayer::GetWeapon(int WID)
 	}
 
 	m_GameExp.m_Weapons |= (int)pow(2, WID);
+	m_pCharacter->GiveWeapon(WID, 10);
 	
 	if(m_pCharacter)
 	{

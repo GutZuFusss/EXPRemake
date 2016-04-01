@@ -103,7 +103,7 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_WEAPON:
-				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS)
+				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS+2)
 				{
 					if(pPlayer->GetWeapon(m_Subtype) && !pPlayer->IsBot())
 					{
