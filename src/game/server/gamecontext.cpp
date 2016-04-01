@@ -38,6 +38,8 @@ void CGameContext::Construct(int Resetting)
 
 	if(Resetting==NO_RESET)
 		m_pVoteOptionHeap = new CHeap();
+
+	m_pDatabase = new CSql();
 }
 
 CGameContext::CGameContext(int Resetting)

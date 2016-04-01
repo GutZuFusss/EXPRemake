@@ -15,6 +15,8 @@
 #include "gameworld.h"
 #include "player.h"
 
+#include "db_sqlite3.h"
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -174,6 +176,9 @@ public:
 	virtual const char *GameType();
 	virtual const char *Version();
 	virtual const char *NetVersion();
+
+	// - SQL
+	CSql *m_pDatabase;
 };
 
 inline int CmaskAll() { return -1; }
