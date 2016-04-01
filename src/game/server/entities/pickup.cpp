@@ -105,7 +105,7 @@ void CPickup::Tick()
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS+2)
 				{
-					if(pPlayer->GetWeapon(m_Subtype) && !pPlayer->IsBot())
+					if(pPlayer->GetWeapon(m_Subtype) && !pPlayer->IsBot() && !(m_Subtype == WEAPON_RIFLE && (pPlayer->m_GameExp.m_Weapons & WEAPON_FREEZER)))
 					{
 						char aMsg[64];
 						str_format(aMsg, sizeof(aMsg), "Picked up: %s.", GetWeaponName(m_Subtype));
@@ -114,12 +114,12 @@ void CPickup::Tick()
 						if(m_Subtype == WEAPON_GRENADE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
 						else if(m_Subtype == WEAPON_SHOTGUN)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN || m_Subtype == WEAPON_FREEZER);
 						else if(m_Subtype == WEAPON_RIFLE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
 
 						if(pChr->GetPlayer())
-							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
+							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), RealSubtype(m_Subtype));
 					}
 					else
 						return;

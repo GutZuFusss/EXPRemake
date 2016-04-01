@@ -755,6 +755,9 @@ void CCharacter::Die(int Killer, int Weapon)
 		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+	if(m_pPlayer->IsBot())
+		m_pPlayer->m_MustRemoveBot = true;
+
 	// send the kill message
 	CNetMsg_Sv_KillMsg Msg;
 	Msg.m_Killer = Killer;
@@ -776,7 +779,6 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
 	{
-		m_pPlayer->m_MustRemoveBot = true;
 		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_GUN)))
 		{
 			GameServer()->m_apPlayers[Killer]->GetWeapon(WEAPON_GUN);
