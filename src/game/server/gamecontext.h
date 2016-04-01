@@ -179,7 +179,8 @@ public:
 
 	// - SQL
 	CSql *m_pDatabase;
-	void SaveRank(const char *pName, int Time, int Kills);
+	void SaveRank(const char *pMap, const char *pName, int Time, int Kills);
+	void Top5(const char *pMap, int ClientID);
 };
 
 class CQueryBase : public CQuery
@@ -189,7 +190,7 @@ public:
 	CGameContext *m_pGameServer;
 };
 
-class CQuerySave: public CQueryBase
+class CQueryTop5: public CQueryBase
 {
 	void OnData();
 public:

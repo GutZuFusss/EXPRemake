@@ -272,6 +272,11 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
+	else if(!strncmp(aMsg, "/top5", 5))
+	{
+		GameServer()->Top5(g_Config.m_SvMap, ClientID);
+		return true;
+	}
 	else if(!strncmp(aMsg, "/cmdlist", 8) || !strncmp(aMsg, "/cmd", 4))
 	{
 		GameServer()->SendChatTarget(ClientID, " ");
@@ -395,7 +400,7 @@ void CGameControllerEXP::StopClient(int ID)
 	str_format(buf, sizeof(buf), "'%s' finished in %d minutes %d seconds with %d kills. Good Game!", Server()->ClientName(ID), min, sec, GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills);
 	GameServer()->SendChatTarget(-1, buf);
 
-	GameServer()->SaveRank(Server()->ClientName(ID), GameServer()->m_apPlayers[ID]->m_GameExp.m_Time, GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills);
+	GameServer()->SaveRank(g_Config.m_SvMap, Server()->ClientName(ID), GameServer()->m_apPlayers[ID]->m_GameExp.m_Time, GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills);
 	
 	bool GotFreezer = false;
 	if(GameServer()->m_apPlayers[ID]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_FREEZER))

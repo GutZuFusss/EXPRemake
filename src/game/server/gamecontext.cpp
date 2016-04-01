@@ -15,6 +15,22 @@
 #include "gamemodes/mod.h"
 #include "gamemodes/exp/exp.h"
 
+void CQueryTop5::OnData()
+{
+	m_pGameServer->SendChatTarget(m_ClientID, "~~~~~~~~ Top 5 ~~~~~~~~");
+
+
+    int i = 0;
+    char aBuf[512];
+    while(Next())
+    {
+        i++;
+        int Time = GetInt(GetID("Time"));
+        str_format(aBuf, sizeof(aBuf), "%d.: '%s': %dm%ds (%d kills)", i, GetText(GetID("Name")), Time/60, Time%60, GetInt(GetID("Kills")));
+        m_pGameServer->SendChatTarget(m_ClientID, aBuf);
+    }
+}
+
 enum
 {
 	RESET,
@@ -1678,10 +1694,20 @@ const char *CGameContext::NetVersion() { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
-void CGameContext::SaveRank(const char *pName, int Time, int Kills)
+void CGameContext::SaveRank(const char *pMap, const char *pName, int Time, int Kills)
 {
-	char *pQueryBuf = sqlite3_mprintf("INSERT INTO Saves (Name, Time, Kills) VALUES ('%q', '%d', '%d');", pName, Time, Kills);
+	char *pQueryBuf = sqlite3_mprintf("INSERT INTO Saves (Map, Name, Time, Kills) VALUES ('%q', '%q', '%d', '%d');", pMap, pName, Time, Kills);
 	CQuery *pQuery = new CQuery();
+	pQuery->Query(m_pDatabase, pQueryBuf);
+	sqlite3_free(pQueryBuf);
+}
+
+void CGameContext::Top5(const char *pMap, int ClientID)
+{
+	char *pQueryBuf = sqlite3_mprintf("SELECT * FROM Saves WHERE Map='%q' ORDER BY Time ASC LIMIT 0,5", pMap);
+	CQueryTop5 *pQuery = new CQueryTop5();
+	pQuery->m_ClientID = ClientID;
+	pQuery->m_pGameServer = this;
 	pQuery->Query(m_pDatabase, pQueryBuf);
 	sqlite3_free(pQueryBuf);
 }
