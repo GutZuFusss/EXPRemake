@@ -105,7 +105,8 @@ CSql::CSql()
 
 	char *Query = "CREATE TABLE IF NOT EXISTS Saves (" \
 		"ID INTEGER					PRIMARY KEY		AUTOINCREMENT," \
-		"Name						TEXT		    NOT NULL," \
+        "Map                        TEXT            NOT NULL," \
+        "Name                       TEXT            NOT NULL," \
 		"Time						INTEGER," \
 		"Kills					    INTEGER);";
 

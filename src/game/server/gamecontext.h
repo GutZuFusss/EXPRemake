@@ -182,14 +182,14 @@ public:
 	void SaveRank(const char *pName, int Time, int Kills);
 };
 
-class CQueryPlayer : public CQuery
+class CQueryBase : public CQuery
 {
 public:
 	int m_ClientID;
 	CGameContext *m_pGameServer;
 };
 
-class CQuerySave: public CQueryPlayer
+class CQuerySave: public CQueryBase
 {
 	void OnData();
 public:
