@@ -32,6 +32,8 @@ public:
 
     class CSql *m_pDatabase;
     void Query(class CSql *pDatabase, char *pQuery);
+
+    virtual ~CQuery();
 };
 
 class CSql

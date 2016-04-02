@@ -32,6 +32,10 @@ int CQuery::GetID(const char *pName)
     return -1;
 }
 
+CQuery::~CQuery()
+{
+}
+
 void CSql::WorkerThread()
 {
 	/*CALL_STACK_ADD();*/
@@ -103,14 +107,14 @@ CSql::CSql()
         sqlite3_close(m_pDB);
     }
 
-	char *Query = "CREATE TABLE IF NOT EXISTS Saves (" \
+	char *pQuery = (char *)"CREATE TABLE IF NOT EXISTS Saves (" \
 		"ID INTEGER					PRIMARY KEY		AUTOINCREMENT," \
         "Map                        TEXT            NOT NULL," \
         "Name                       TEXT            NOT NULL," \
 		"Time						INTEGER," \
 		"Kills					    INTEGER);";
 
-    sqlite3_exec(m_pDB, Query, 0, 0, 0);
+    sqlite3_exec(m_pDB, pQuery, 0, 0, 0);
 
     m_Lock = lock_create();
     m_Running = true;
