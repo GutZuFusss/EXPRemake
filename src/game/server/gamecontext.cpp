@@ -465,7 +465,8 @@ static const char *s_apHints[] = {
 		"Teaming up with other tees is definetly a good idea!",
 		"You may restart your game by typing \"/new\".",
 		"Check out \"/cmdlist\"!",
-		"\"/game\": Show your weapons, kills, armor and so on!"
+		"\"/game\": Show your weapons, kills, armor and so on!",
+		"Try out \"/top5\" and \"/rank\"!",
 };
 
 void CGameContext::OnTick()
