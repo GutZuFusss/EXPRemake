@@ -779,7 +779,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
 	{
-		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_GUN)))
+		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow((int)2, (int)WEAPON_GUN)))
 		{
 			GameServer()->m_apPlayers[Killer]->GetWeapon(WEAPON_GUN);
             GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);

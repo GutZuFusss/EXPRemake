@@ -409,7 +409,7 @@ void CGameControllerEXP::StopClient(int ID)
 	GameServer()->SaveRank(g_Config.m_SvMap, Server()->ClientName(ID), GameServer()->m_apPlayers[ID]->m_GameExp.m_Time, GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills);
 	
 	bool GotFreezer = false;
-	if(GameServer()->m_apPlayers[ID]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_FREEZER))
+	if(GameServer()->m_apPlayers[ID]->m_GameExp.m_Weapons & (int)pow((int)2, (int)WEAPON_FREEZER))
 		GotFreezer = true;
 	
 	RestartClient(ID);
