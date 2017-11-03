@@ -737,9 +737,9 @@ bool CCharacter::IncreaseHealth(int Amount)
 
 bool CCharacter::IncreaseArmor(int Amount)
 {
-	if(m_Armor >= m_pPlayer->MaxHealth())
+	if (m_Armor >= 10)
 		return false;
-	m_Armor = clamp(m_Armor+Amount, 0, m_pPlayer->MaxHealth());
+	m_Armor = clamp(m_Armor + Amount, 0, 10);
 	return true;
 }
 

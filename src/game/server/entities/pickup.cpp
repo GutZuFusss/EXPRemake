@@ -77,33 +77,35 @@ void CPickup::Tick()
 		if (isBot) return;
 
 		// player picked us up, is someone was hooking us, let them go
+		int RespawnTime = -1;
 		switch (m_Type)
 		{
 			case POWERUP_HEALTH:
 				if(pChr->IncreaseHealth(4))
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 				}
 				break;
 
 			case POWERUP_ARMOR:
-				if(pPlayer->m_GameExp.m_ArmorMax < 10)
-				{
-					if(pPlayer->m_GameExp.m_ArmorMax == 0)
-						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: ARMOR. Say /items for more info.");
-					else
-						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: ARMOR.");
-
+				if (pChr->IncreaseArmor(1)) {
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
-					pPlayer->m_GameExp.m_ArmorMax += 1;
-					pChr->m_Armor += 1;
+					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+					if (pPlayer->m_GameExp.m_ArmorMax < 10)
+					{
+						pPlayer->m_GameExp.m_ArmorMax += 1;
+					}
 				}
+				
 				break;
 
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS+2) {
 					if (pChr->GiveWeapon(m_Subtype, 10))
 					{
+						RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+
 						if (m_Subtype == WEAPON_GRENADE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
 						else if (m_Subtype == WEAPON_SHOTGUN)
@@ -121,6 +123,7 @@ void CPickup::Tick()
 				{
 					// activate ninja on target player
 					pChr->GiveNinja();
+					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
 					// loop through all players, setting their emotes
 					CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
@@ -144,9 +147,14 @@ void CPickup::Tick()
 						str_format(aBuf, sizeof(aBuf), "Picked up: LIFE (%d)", pPlayer->m_GameExp.m_Items.m_Lives+1);
 						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 					}
+	
 					pPlayer->m_GameExp.m_Items.m_Lives++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					if (m_FromDrop)
+					{
+						GameServer()->m_World.DestroyEntity(this);
+					}
 				}
 				break;
 			
@@ -163,6 +171,10 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_Items.m_MinorPotions++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					if (m_FromDrop)
+					{
+						GameServer()->m_World.DestroyEntity(this);
+					}
 				}
 				break;
 			
@@ -179,6 +191,10 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_Items.m_GreaterPotions++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					if (m_FromDrop)
+					{
+						GameServer()->m_World.DestroyEntity(this);
+					}
 				}
 				break;
 
@@ -186,16 +202,8 @@ void CPickup::Tick()
 				break;
 		};
 
-		if(m_FromDrop)
-		{
-			GameServer()->m_World.DestroyEntity(this);
-		}
-		else
-		{
-			int RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-			if(RespawnTime >= 0)
-				m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
-		}
+		if(RespawnTime >= 0)
+			m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 	}
 
 	if(m_Type == POWERUP_MINOR_POTION || m_Type == POWERUP_GREATER_POTION)
