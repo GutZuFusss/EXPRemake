@@ -20,3 +20,13 @@ teeworlds*
 teeworlds_srv*
 tileset_border*
 versionsrv*
+
+.idea
+.vs
+cmake-build-debug
+Debug
+CMakeLists.txt
+EXPRemake2017*
+exp_config.cfg
+exp_srv.lnk
+
