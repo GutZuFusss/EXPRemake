@@ -73,21 +73,21 @@ void CPickup::Tick()
 	if(pChr && pChr->IsAlive())
 	{
 		CPlayer *pPlayer = pChr->GetPlayer();
+		bool isBot = pPlayer->IsBot();
+		if (isBot) return;
 
 		// player picked us up, is someone was hooking us, let them go
 		switch (m_Type)
 		{
 			case POWERUP_HEALTH:
-				if(!pPlayer->IsBot() && pChr->IncreaseHealth(4))
+				if(pChr->IncreaseHealth(4))
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 				}
-				else
-					return;
 				break;
 
 			case POWERUP_ARMOR:
-				if(!pPlayer->IsBot() && pPlayer->m_GameExp.m_ArmorMax < 10)
+				if(pPlayer->m_GameExp.m_ArmorMax < 10)
 				{
 					if(pPlayer->m_GameExp.m_ArmorMax == 0)
 						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: ARMOR. Say /items for more info.");
@@ -98,31 +98,22 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_ArmorMax += 1;
 					pChr->m_Armor += 1;
 				}
-				else
-					return;
 				break;
 
 			case POWERUP_WEAPON:
-				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS+2)
-				{
-					if(pPlayer->GetWeapon(m_Subtype) && !pPlayer->IsBot() && !(m_Subtype == WEAPON_RIFLE && (pPlayer->m_GameExp.m_Weapons & WEAPON_FREEZER)))
+				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS+2) {
+					if (pChr->GiveWeapon(m_Subtype, 10))
 					{
-						char aMsg[64];
-						str_format(aMsg, sizeof(aMsg), "Picked up: %s.", GetWeaponName(m_Subtype));
-						GameServer()->SendChatTarget(pPlayer->GetCID(), aMsg);
-
-						if(m_Subtype == WEAPON_GRENADE)
+						if (m_Subtype == WEAPON_GRENADE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE);
-						else if(m_Subtype == WEAPON_SHOTGUN)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN || m_Subtype == WEAPON_FREEZER);
-						else if(m_Subtype == WEAPON_RIFLE)
+						else if (m_Subtype == WEAPON_SHOTGUN)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
+						else if (m_Subtype == WEAPON_RIFLE)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN);
 
-						if(pChr->GetPlayer())
-							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), RealSubtype(m_Subtype));
+						if (pChr->GetPlayer())
+							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
 					}
-					else
-						return;
 				}
 				break;
 
@@ -145,64 +136,49 @@ void CPickup::Tick()
 
 			case POWERUP_LIFE:
 				{
-					if(!pPlayer->IsBot())
-					{
-						if(pPlayer->m_GameExp.m_Items.m_Lives == 0)
-							GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: LIFE. Say /items for more info.");
-						else
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "Picked up: LIFE (%d)", pPlayer->m_GameExp.m_Items.m_Lives+1);
-							GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
-						}
-						pPlayer->m_GameExp.m_Items.m_Lives++;
-						
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					}
+					if(pPlayer->m_GameExp.m_Items.m_Lives == 0)
+						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: LIFE. Say /items for more info.");
 					else
-						return;
+					{
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "Picked up: LIFE (%d)", pPlayer->m_GameExp.m_Items.m_Lives+1);
+						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+					}
+					pPlayer->m_GameExp.m_Items.m_Lives++;
+						
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 				}
 				break;
 			
 			case POWERUP_MINOR_POTION:
 				{
-					if(!pPlayer->IsBot())
-					{
-						if(pPlayer->m_GameExp.m_Items.m_MinorPotions == 0)
-							GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: MINOR POTION. Say /items for more info.");
-						else
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "Picked up: MINOR POTION (%d)", pPlayer->m_GameExp.m_Items.m_MinorPotions+1);
-							GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
-						}
-						pPlayer->m_GameExp.m_Items.m_MinorPotions++;
-						
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					}
+					if(pPlayer->m_GameExp.m_Items.m_MinorPotions == 0)
+						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: MINOR POTION. Say /items for more info.");
 					else
-						return;
+					{
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "Picked up: MINOR POTION (%d)", pPlayer->m_GameExp.m_Items.m_MinorPotions+1);
+						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+					}
+					pPlayer->m_GameExp.m_Items.m_MinorPotions++;
+						
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 				}
 				break;
 			
 			case POWERUP_GREATER_POTION:
 				{
-					if(!pPlayer->IsBot())
-					{
-						if(pPlayer->m_GameExp.m_Items.m_GreaterPotions == 0)
-							GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: GREATER POTION. Say /items for more info.");
-						else
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "Picked up: GREATER POTION (%d)", pPlayer->m_GameExp.m_Items.m_GreaterPotions+1);
-							GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
-						}
-						pPlayer->m_GameExp.m_Items.m_GreaterPotions++;
-						
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					}
+					if(pPlayer->m_GameExp.m_Items.m_GreaterPotions == 0)
+						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: GREATER POTION. Say /items for more info.");
 					else
-						return;
+					{
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "Picked up: GREATER POTION (%d)", pPlayer->m_GameExp.m_Items.m_GreaterPotions+1);
+						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+					}
+					pPlayer->m_GameExp.m_Items.m_GreaterPotions++;
+						
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
 				}
 				break;
 
