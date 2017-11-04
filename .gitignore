@@ -26,7 +26,7 @@ versionsrv*
 cmake-build-debug
 Debug
 CMakeLists.txt
-EXPRemake2017*
+EXP.*
 exp_config.cfg
 exp_srv.lnk
 
