@@ -11,6 +11,7 @@ class CPickup : public CEntity
 {
 public:
 	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0);
+	CPickup(CGameWorld *pGameWorld, vec2 Pos, int Type, int SubType = 0);
 
 	virtual void Reset();
 	virtual void Tick();

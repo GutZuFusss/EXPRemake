@@ -13,6 +13,7 @@
 #include "door.h"
 #include "laser.h"
 #include "projectile.h"
+#include "pickup.h"
 
 //input count
 struct CInputCount
@@ -780,19 +781,16 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
 	{
-		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_PermaWeapons[WEAPON_GUN].m_Got))
-		{
-			//todo don't give the weapon but let it spawn!
-			//todo when killing someone with the gun, the gun's ammo is set to 10 again and the giveWeapon statement return true.
-			if (GameServer()->m_apPlayers[Killer]->GetCharacter()->GiveWeapon(WEAPON_GUN, 10)) {
-				GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
-				GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
+		CPlayer* KillerPlayer = GameServer()->m_apPlayers[Killer];
+		if (KillerPlayer) {
+			KillerPlayer->m_Score++;
+
+			if (KillerPlayer->GetCharacter() && !KillerPlayer->IsBot() && !KillerPlayer->m_GameExp.m_PermaWeapons[WEAPON_GUN].m_Got)
+			{
+				CPickup *pPickup = new CPickup(&GameServer()->m_World, m_Pos, POWERUP_WEAPON, WEAPON_GUN);
 			}
 		}
-
-		if(GameServer()->m_apPlayers[Killer])
-			GameServer()->m_apPlayers[Killer]->m_Score++;
-
+			
 		if(m_pPlayer->m_BotLevel == 4)
 		{
 			for(int i = 0; i < g_Config.m_SvMaxClients; i++)
@@ -813,43 +811,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	{
 		if(From >= 0 && GameServer()->m_apPlayers[From])
 			GameServer()->m_apPlayers[From]->m_GameExp.m_BossHitter = true;
-		
-		/*CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
-		
-		if(pBoss->m_ShieldActive)
-		{
-			if(Weapon == WEAPON_HAMMER)
-				pBoss->m_ShieldHealth -= 3;
-			else
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH);
-			
-			if(pBoss->m_ShieldHealth <= 12 && pBoss->m_apShieldIcons[2])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[2]);
-				pBoss->m_apShieldIcons[2] = NULL;
-			}
-			if(pBoss->m_ShieldHealth <= 6 && pBoss->m_apShieldIcons[1])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[1]);
-				pBoss->m_apShieldIcons[1] = NULL;
-			}
-			if(pBoss->m_ShieldHealth <= 0 && pBoss->m_apShieldIcons[0])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[0]);
-				pBoss->m_apShieldIcons[0] = NULL;
-			}
-			
-			if(pBoss->m_ShieldHealth <= 0)
-			{
-				pBoss->m_ShieldActive = false;
-				pBoss->m_ShieldTimer = Server()->Tick() + 15.0f*Server()->TickSpeed();
-				GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
-				GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
-			}
-			
-			m_Core.m_Vel += Force*0.5f;
-			return true;
-		}*/
 	}
 
 	m_Core.m_Vel += Force;

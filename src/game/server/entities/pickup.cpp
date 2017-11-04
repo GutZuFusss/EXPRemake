@@ -14,7 +14,6 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType)
 {
 	m_FromDrop = false;
 	m_DieTimer = Server()->Tick();
-	m_IsBossShield = false;
 
 	m_Type = Type;
 	m_Subtype = SubType;
@@ -22,6 +21,20 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType)
 
 	Reset();
 
+	GameWorld()->InsertEntity(this);
+}
+
+CPickup::CPickup(CGameWorld *pGameWorld, vec2 Pos, int Type, int SubType)
+	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
+{
+	m_Pos = Pos;
+	m_Type = Type;
+	m_Subtype = SubType;
+	m_DieTimer = Server()->Tick();
+	m_ProximityRadius = PickupPhysSize;
+
+	Reset();
+	m_FromDrop = true;
 	GameWorld()->InsertEntity(this);
 }
 
