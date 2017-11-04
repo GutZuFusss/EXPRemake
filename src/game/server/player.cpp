@@ -449,7 +449,7 @@ void CPlayer::LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, 
 	m_GameExp.m_BossKiller = BKiller;
 }
 
-bool CPlayer::GetWeapon(int WID)
+bool CPlayer::GiveWeaponPermanently(int WID)
 {
 	if(m_GameExp.m_Weapons & WID)
 		return false;

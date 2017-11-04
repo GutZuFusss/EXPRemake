@@ -126,7 +126,7 @@ public:
 	} m_GameExp;
 
 	void LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller);
-	bool GetWeapon(int WID);
+	bool GiveWeaponPermanently(int WID);
 
 	// lil hack
 	CFlag *m_pClosestFlag;

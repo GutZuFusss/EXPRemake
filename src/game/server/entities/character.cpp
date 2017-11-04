@@ -496,6 +496,7 @@ bool CCharacter::GiveWeapon(int Weapon, int Ammo)
 	{
 		m_aWeapons[Weapon].m_Got = true;
 		m_aWeapons[Weapon].m_Ammo = min(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
+		GetPlayer()->GiveWeaponPermanently(Weapon);
 		return true;
 	}
 	return false;
@@ -781,7 +782,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	{
 		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow((int)2, (int)WEAPON_GUN)))
 		{
-			GameServer()->m_apPlayers[Killer]->GetWeapon(WEAPON_GUN);
+			GameServer()->m_apPlayers[Killer]->GiveWeaponPermanently(WEAPON_GUN);
             GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
 			GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
 		}

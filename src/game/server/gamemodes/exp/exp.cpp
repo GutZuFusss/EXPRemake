@@ -415,7 +415,7 @@ void CGameControllerEXP::StopClient(int ID)
 	RestartClient(ID);
 	
 	if(GotFreezer)
-		GameServer()->m_apPlayers[ID]->GetWeapon(WEAPON_FREEZER);
+		GameServer()->m_apPlayers[ID]->GiveWeaponPermanently(WEAPON_FREEZER);
 }
 
 void CGameControllerEXP::RestartClient(int ID)
