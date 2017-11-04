@@ -782,9 +782,10 @@ void CCharacter::Die(int Killer, int Weapon)
 	{
 		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & WEAPON_GUN))
 		{
-			GameServer()->m_apPlayers[Killer]->GetCharacter()->GiveWeapon(WEAPON_GUN, 10);
-            GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
-			GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
+			if (GameServer()->m_apPlayers[Killer]->GetCharacter()->GiveWeapon(WEAPON_GUN, 10)) {
+				GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
+				GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
+			}
 		}
 
 		if(GameServer()->m_apPlayers[Killer])
