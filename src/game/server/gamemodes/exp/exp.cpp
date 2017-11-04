@@ -392,7 +392,7 @@ void CGameControllerEXP::StartClient(int ID)
 {
 	GameServer()->m_apPlayers[ID]->KillCharacter(WEAPON_GAME);
 	CItems Items; Items.m_Lives = 0; Items.m_MinorPotions = 0; Items.m_GreaterPotions = 0;
-	GameServer()->m_apPlayers[ID]->LoadGame(m_aaSpawnPoints[1][0], 0, 0, 0, 0, 0, Items, false, false);
+	GameServer()->m_apPlayers[ID]->LoadNewGame(m_aaSpawnPoints[1][0]);
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick = Server()->Tick();
 	//SendItems(ID);
 }
@@ -415,7 +415,7 @@ void CGameControllerEXP::StopClient(int ID)
 	RestartClient(ID);
 	
 	if(GotFreezer)
-		GameServer()->m_apPlayers[ID]->GiveWeaponPermanently(WEAPON_FREEZER);
+		GameServer()->m_apPlayers[ID]->GiveWeaponPermanently(WEAPON_FREEZER, -1);
 }
 
 void CGameControllerEXP::RestartClient(int ID)
@@ -464,7 +464,7 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 			if(p->GetTeam() != -1 && !p->GetCharacter())
 			{
 				p->m_GameExp.m_Items.m_Lives--;
-				p->LoadGame(p->m_ViewPos, p->m_GameExp.m_LastFlag, p->m_Score, p->m_GameExp.m_Time, p->m_GameExp.m_ArmorMax, p->m_GameExp.m_Weapons, p->m_GameExp.m_Items, p->m_GameExp.m_BossHitter, p->m_GameExp.m_BossKiller);
+				p->LoadGame(p->m_ViewPos, p->m_GameExp.m_Time);
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Life used. %d lives left.", p->m_GameExp.m_Items.m_Lives);
 				GameServer()->SendChatTarget(ClientID, aBuf);

@@ -300,12 +300,11 @@ void CPlayer::TryRespawn()
 			return;
 
 		m_GameExp.m_EnterTick = Server()->Tick();
-		LoadGame(SpawnPos, m_GameExp.m_LastFlag, m_Score, 0, m_GameExp.m_ArmorMax, m_GameExp.m_Weapons, m_GameExp.m_Items, m_GameExp.m_BossHitter, m_GameExp.m_BossKiller);
+		LoadNewGame(SpawnPos);
 	}
 	else if(m_Team != -1)
 	{
-		LoadGame(((CGameControllerEXP*)GameServer()->m_pController)->m_aFlagsCP[m_GameExp.m_LastFlag-1]->GetPos(), m_GameExp.m_LastFlag,
-			m_Score, m_GameExp.m_Time, m_GameExp.m_ArmorMax, m_GameExp.m_Weapons, m_GameExp.m_Items, m_GameExp.m_BossHitter, m_GameExp.m_BossKiller);
+		LoadGame(((CGameControllerEXP*)GameServer()->m_pController)->m_aFlagsCP[m_GameExp.m_LastFlag-1]->GetPos(), m_GameExp.m_Time);
 
 	}
 }
@@ -401,80 +400,33 @@ const char *CPlayer::GetMonsterName()
 		return "|-|";
 }
 
-void CPlayer::LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller)
+void CPlayer::LoadNewGame(vec2 SpawnPos)
 {
-	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
-	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], SpawnPos);
-	GameServer()->CreatePlayerSpawn(SpawnPos);
-	m_GameExp.m_ArmorMax = Armor;
-	m_pCharacter->m_Armor = Armor;
-	m_GameExp.m_LastFlag = Flag;
-	m_GameExp.m_Kills = Kills;
-	m_Score = Kills;
-	m_GameExp.m_Time = Time;
-	if(w & WEAPON_GUN)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_GUN].m_Maxammo;
-	}
-	if(w & WEAPON_SHOTGUN)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_Maxammo;
-	}
-	if(w & WEAPON_GRENADE)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_GRENADE].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Maxammo;
-	}
-	if(w & WEAPON_RIFLE)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_RIFLE].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_RIFLE].m_Ammo = g_pData->m_Weapons.m_aId[WEAPON_RIFLE].m_Maxammo;
-	}
-	if(w & WEAPON_KAMIKAZE)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Ammo = -1;
-	}
-	if(w & WEAPON_FREEZER)
-	{
-		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Ammo = -1;
-	}
-	m_GameExp.m_Weapons = w;
-	m_GameExp.m_Items = Items;
-	m_GameExp.m_BossHitter = BHitter;
-	m_GameExp.m_BossKiller = BKiller;
+	LoadGame(SpawnPos, 0);
 }
 
-bool CPlayer::GiveWeaponPermanently(int WID)
+void CPlayer::LoadGame(vec2 SpawnPos, int Time)
 {
-	if(m_GameExp.m_Weapons & WID)
-		return false;
+	m_GameExp.m_Time = Time;
+	m_Spawning = false;
+	GameServer()->CreatePlayerSpawn(SpawnPos);
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], SpawnPos);
+	m_pCharacter->m_Armor = m_GameExp.m_ArmorMax;
 	
-	if(WID == WEAPON_RIFLE && m_GameExp.m_Weapons & WEAPON_FREEZER)
-		return false;
-	if(WID == WEAPON_FREEZER)
-	{
-		m_GameExp.m_Weapons &= ~WEAPON_RIFLE;
-		if(m_pCharacter)
-			m_pCharacter->m_aWeapons[WEAPON_RIFLE].m_Got = false;
+	for (int i = 0; i < NUM_WEAPONS+2; i += 1) {
+		bool gotWeapon = m_GameExp.m_PermaWeapons[i].m_Got;
+		int ammo = m_GameExp.m_PermaWeapons[i].m_StartAmmo;
+		m_pCharacter->m_aWeapons[i].m_Got = gotWeapon;
+		m_pCharacter->m_aWeapons[i].m_Ammo = ammo;
 	}
+}
 
-	m_GameExp.m_Weapons |= WID;
-	m_pCharacter->GiveWeapon(WID, 10);
-	
-	if(m_pCharacter)
-	{
-		m_pCharacter->m_aWeapons[WID].m_Got = true;
-		
-		if(WID == WEAPON_HAMMER || WID == WEAPON_KAMIKAZE || WID == WEAPON_FREEZER)
-			m_pCharacter->m_aWeapons[WID].m_Ammo = -1;
-		else
-			m_pCharacter->m_aWeapons[WID].m_Ammo = g_pData->m_Weapons.m_aId[WID].m_Maxammo;
+bool CPlayer::GiveWeaponPermanently(int Weapon, int PermaStartAmmo) {
+	if (m_GameExp.m_PermaWeapons[Weapon].m_Got == false) {
+		m_GameExp.m_PermaWeapons[Weapon].m_Got = true;
+		m_GameExp.m_PermaWeapons[Weapon].m_StartAmmo = PermaStartAmmo;
+		return true;
 	}
-
-	return true;
+	return false;
 }
