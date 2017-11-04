@@ -780,8 +780,10 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
 	{
-		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & WEAPON_GUN))
+		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_PermaWeapons[WEAPON_GUN].m_Got))
 		{
+			//todo don't give the weapon but let it spawn!
+			//todo when killing someone with the gun, the gun's ammo is set to 10 again and the giveWeapon statement return true.
 			if (GameServer()->m_apPlayers[Killer]->GetCharacter()->GiveWeapon(WEAPON_GUN, 10)) {
 				GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
 				GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
