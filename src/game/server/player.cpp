@@ -324,11 +324,11 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	
 	if(m_BotLevel == 1)
 	{
-		str_copy(m_TeeInfos.m_SkinName, "bear", sizeof(m_TeeInfos.m_SkinName));
+		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
 	}
 	else if(m_BotLevel == 2)
 	{
-		str_copy(m_TeeInfos.m_SkinName, "standard", sizeof(m_TeeInfos.m_SkinName));
+		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got = false;
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
@@ -339,14 +339,14 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	}
 	else if(m_BotLevel == 3)
 	{
-		str_copy(m_TeeInfos.m_SkinName, "standard", sizeof(m_TeeInfos.m_SkinName));
+		str_copy(m_TeeInfos.m_SkinName, "twinbop", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
 	}
 	else if(m_BotLevel == 4)
 	{
-		str_copy(m_TeeInfos.m_SkinName, "standard", sizeof(m_TeeInfos.m_SkinName));
+		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
 		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Got = true;
