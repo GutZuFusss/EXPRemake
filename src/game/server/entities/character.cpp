@@ -8,6 +8,7 @@
 #include <game/server/gamemodes/exp/exp.h>
 #include <game/server/gamemodes/exp/environment.h>
 #include <game/server/gamemodes/exp/bots.h>
+#include <game/server/gamemodes/exp/loothandler.h>
 
 #include "character.h"
 #include "door.h"
@@ -779,26 +780,42 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 
-	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
-	{
-		CPlayer* KillerPlayer = GameServer()->m_apPlayers[Killer];
-		if (KillerPlayer) {
-			KillerPlayer->m_Score++;
+	//we don't want to cast to CPlayer if this fails
+	if (Killer < 0 || Killer > MAX_CLIENTS) {
+		return;
+	}
 
-			if (KillerPlayer->GetCharacter() && !KillerPlayer->IsBot() && !KillerPlayer->m_GameExp.m_PermaWeapons[WEAPON_GUN].m_Got)
-			{
-				CPickup *pPickup = new CPickup(&GameServer()->m_World, m_Pos, POWERUP_WEAPON, WEAPON_GUN);
-			}
+	CPlayer* KillerPlayer = GameServer()->m_apPlayers[Killer];
+	if (KillerPlayer) {
+		KillerPlayer->m_Score++;
+		if (m_pPlayer->IsBot()) {
+			OnBotDeath(KillerPlayer, Weapon);
 		}
-			
-		if(m_pPlayer->m_BotLevel == 4)
-		{
-			for(int i = 0; i < g_Config.m_SvMaxClients; i++)
-			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_GameExp.m_BossHitter)
-					GameServer()->m_apPlayers[i]->m_GameExp.m_BossKiller = true;
-			}
+	}
+}
+
+void CCharacter::OnBotDeath(CPlayer* Killer, int Weapon) {
+	if (Killer && !Killer->IsBot()) {
+
+		//always drop a gun if the killer doesn't have one yet
+		if (!Killer->HasWeaponPermanently(WEAPON_GUN)) {
+			CLootHandler::DropWeapon(&GameServer()->m_World, m_Pos, WEAPON_GUN);
 		}
+		else {
+			CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotLevel);
+		}
+	}
+
+	if (m_pPlayer->m_BotLevel == 4) {
+		OnBossBotDeath();
+	}
+}
+
+void CCharacter::OnBossBotDeath() {
+	for (int i = 0; i < g_Config.m_SvMaxClients; i++)
+	{
+		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_GameExp.m_BossHitter)
+			GameServer()->m_apPlayers[i]->m_GameExp.m_BossKiller = true;
 	}
 }
 

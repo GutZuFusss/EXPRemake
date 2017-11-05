@@ -135,6 +135,7 @@ public:
 	void LoadNewGame(vec2 SpawnPos);
 	void LoadGame(vec2 SpawnPos, int Time);
 	bool GiveWeaponPermanently(int Weapon, int PermaStartAmmo);
+	bool HasWeaponPermanently(int Weapon);
 
 	// lil hack
 	CFlag *m_pClosestFlag;

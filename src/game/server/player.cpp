@@ -430,3 +430,7 @@ bool CPlayer::GiveWeaponPermanently(int Weapon, int PermaStartAmmo) {
 	}
 	return false;
 }
+
+bool CPlayer::HasWeaponPermanently (int Weapon) {
+	return m_GameExp.m_PermaWeapons[Weapon].m_Got;
+}
