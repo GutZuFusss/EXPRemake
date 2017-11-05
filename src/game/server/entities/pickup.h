@@ -27,7 +27,6 @@ public:
 	const char *GetWeaponName(int wid);
 	int RealPickup(int Type);
 	int RealSubtype(int Type);
-	void CreateRandomFromBot(int lvl, vec2 Pos);
 	void CreateRandomFromTurret(int TurretType, vec2 Pos);
 	void MakeBossShield();
 
