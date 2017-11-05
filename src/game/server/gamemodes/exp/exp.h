@@ -59,6 +59,18 @@ public:
 	void BuildDoor(int d);
 
 	void TickEnvironment();
+	void TickPlayerRelatedEnvironment();
+	void TickPlayerUnrelatedEnvironment();
+	void TickTeleport(CPlayer* player);
+	void TickWeaponStrip(CPlayer* player);
+	void TickZones(CPlayer* player);
+	void TickHealingZone(CCharacter* character, CPlayer* player);
+	void TickPoisonZone(CCharacter* character, CPlayer* player);
+	void TickMines();
+	void TickTraps();
+	void TickTurrets();
+	void TickLaserTurrets();
+	void TickGunTurrets();
 	void TickBots();
 
 	// bots functions
