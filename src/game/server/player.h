@@ -122,7 +122,6 @@ public:
 		int m_Time; //seconds
 		int m_Kills;
 		int m_LastFlag;
-		int m_ArmorMax;
 		int m_Weapons;
 		WeaponStat m_PermaWeapons[NUM_WEAPONS+2];
 		int m_RegenTimer; //ticks

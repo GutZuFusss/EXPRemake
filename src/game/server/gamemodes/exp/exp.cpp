@@ -82,11 +82,6 @@ void CGameControllerEXP::Tick()
 						apCloseCharacters[i]->m_Health++;
 						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
 					}
-					else if(apCloseCharacters[i]->m_Armor < apCloseCharacters[i]->GetPlayer()->m_GameExp.m_ArmorMax) //regen armor
-					{
-						apCloseCharacters[i]->m_Armor++;
-						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
-					}
 					else // regen ammo
 					{
 						int WID = apCloseCharacters[i]->m_ActiveWeapon;
@@ -328,10 +323,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 			}
 		}
 		GameServer()->SendChatTarget(ClientID, aBuf);
-		
-		str_format(aBuf, sizeof(aBuf), "Armor: %d", GameServer()->m_apPlayers[ClientID]->m_GameExp.m_ArmorMax);
-		GameServer()->SendChatTarget(ClientID, aBuf);
-		
+				
 		str_format(aBuf, sizeof(aBuf), "Kills: %d", GameServer()->m_apPlayers[ClientID]->m_Score);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
@@ -506,11 +498,10 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 		{
 			if(p->m_GameExp.m_Items.m_GreaterPotions > 0)
 			{
-				if(p->GetCharacter()->m_Health < 10 || p->GetCharacter()->m_Armor < p->m_GameExp.m_ArmorMax)
+				if(p->GetCharacter()->m_Health < 10)
 				{
 					p->m_GameExp.m_Items.m_GreaterPotions--;
 					p->GetCharacter()->m_Health = 10;
-					p->GetCharacter()->m_Armor = p->m_GameExp.m_ArmorMax;
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "Greater Potion used. You have %d Greater Potions left.", p->m_GameExp.m_Items.m_GreaterPotions);
 					GameServer()->SendChatTarget(ClientID, aBuf);

@@ -412,7 +412,6 @@ void CPlayer::LoadGame(vec2 SpawnPos, int Time)
 	GameServer()->CreatePlayerSpawn(SpawnPos);
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], SpawnPos);
-	m_pCharacter->m_Armor = m_GameExp.m_ArmorMax;
 	
 	for (int i = 0; i < NUM_WEAPONS+2; i += 1) {
 		bool gotWeapon = m_GameExp.m_PermaWeapons[i].m_Got;

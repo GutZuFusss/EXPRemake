@@ -105,10 +105,6 @@ void CPickup::Tick()
 				if (pChr->IncreaseArmor(1)) {
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
 					RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-					if (pPlayer->m_GameExp.m_ArmorMax < 10)
-					{
-						pPlayer->m_GameExp.m_ArmorMax += 1;
-					}
 				}
 				
 				break;

@@ -42,11 +42,6 @@ void CGameControllerEXP::TickEnvironment()
 						GameServer()->m_apPlayers[id]->GetCharacter()->m_Health++;
 						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
 					}
-					else if(GameServer()->m_apPlayers[id]->GetCharacter()->m_Armor < GameServer()->m_apPlayers[id]->m_GameExp.m_ArmorMax)
-					{
-						GameServer()->m_apPlayers[id]->GetCharacter()->m_Armor++;
-						GameServer()->m_apPlayers[id]->m_GameExp.m_RegenTimer = Server()->Tick() + GameServer()->Tuning()->m_RegenTimer*Server()->TickSpeed();
-					}
 				}
 			}
 			
