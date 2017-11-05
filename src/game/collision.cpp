@@ -81,6 +81,9 @@ void CCollision::Init(class CLayers *pLayers)
 		case TILE_POISON:
 			m_pTiles[i].m_Index = COLFLAG_POISON;
 			break;
+		case TILE_WEAPONSTRIP:
+			m_pTiles[i].m_Index = COFLAG_WEAPONSTRIP;
+			break;
 		default:
 			m_pTiles[i].m_Index = 0;
 		}

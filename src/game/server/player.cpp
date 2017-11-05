@@ -433,3 +433,13 @@ bool CPlayer::GiveWeaponPermanently(int Weapon, int PermaStartAmmo) {
 bool CPlayer::HasWeaponPermanently (int Weapon) {
 	return m_GameExp.m_PermaWeapons[Weapon].m_Got;
 }
+
+void CPlayer::RemovePermaWeapons() {
+	m_pCharacter->m_ActiveWeapon = WEAPON_HAMMER;
+
+	//keep hammer and gun
+	for (int i = 2; i < NUM_WEAPONS; i++) {
+		m_GameExp.m_PermaWeapons[i].m_Got = m_pCharacter->m_aWeapons[i].m_Got = false;
+		m_GameExp.m_PermaWeapons[i].m_StartAmmo = m_pCharacter->m_aWeapons[i].m_Ammo = 0;
+	}
+}

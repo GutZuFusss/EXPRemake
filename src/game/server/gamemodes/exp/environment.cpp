@@ -57,6 +57,13 @@ void CGameControllerEXP::TickEnvironment()
 					GameServer()->m_apPlayers[id]->m_GameExp.m_PoisonTimer = Server()->Tick() + GameServer()->Tuning()->m_PoisonTimer*Server()->TickSpeed();
 				}
 			}
+
+			if (GameServer()->Collision()->GetCollisionAt(GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().x, GameServer()->m_apPlayers[id]->GetCharacter()->GetPos().y) & CCollision::COFLAG_WEAPONSTRIP)
+			{
+				if (!GameServer()->m_apPlayers[id]->IsBot()) {
+					GameServer()->m_apPlayers[id]->RemovePermaWeapons();
+				}
+			}
 		}
 	}
 
