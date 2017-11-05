@@ -14,6 +14,7 @@ void CLootHandler::HandleLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType) {
 void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType) {
 	//todo put in .cfg
 	//need to be sorted atm?
+	//todo update droprates
 
 	std::map<int, float> droprates;
 	switch (BotType) {	
@@ -39,13 +40,13 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 			break;
 		case 2:
 			droprates[LOOT_HEALTH] = 0.0f;
-			droprates[LOOT_ARMOR] = 0.15f;
+			droprates[LOOT_ARMOR] = 0.0f;
 			droprates[LOOT_HEALTHPOTION] = 0.00f;
 			droprates[LOOT_GUN] = 0.0f;
-			droprates[LOOT_GRENADE] = 0.05f;
+			droprates[LOOT_GRENADE] = 0.0f;
 			droprates[LOOT_SHOTGUN] = 0.00f;
-			droprates[LOOT_LASER] = 0.80f;
-			droprates[LOOT_NINJA] = 0.00f;
+			droprates[LOOT_LASER] = 0.00f;
+			droprates[LOOT_NINJA] = 1.00f;
 			break;
 		case 3:
 			droprates[LOOT_HEALTH] = 0.01f;
@@ -105,7 +106,7 @@ const std::pair<int, int> CLootHandler::LootToPickup(const int LootId) {
 	case LOOT_LASER:
 		return std::pair<int, int>(2, 4);
 	case LOOT_NINJA:
-		return std::pair<int, int>(3, 0);
+		return std::pair<int, int>(3, 5); // e.g. Type = POWERUP_NINJA; SubType = WEAPON_NINJA; /game/server/generated line 258 initial respawn must be 0.
 	default:
 		return std::pair<int, int>(0, 0);
 	}
