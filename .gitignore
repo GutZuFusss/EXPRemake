@@ -4,7 +4,8 @@ config.lua
 datasrc/__pycache__
 datasrc/*.pyc
 objs
-src/game/generated
+src/game/generated/*
+!src/game/generated/server_data.cpp
 SDL.dll
 freetype.dll
 saves.db
