@@ -145,27 +145,43 @@ void CGameControllerEXP::TickMines() {
 	}
 }
 
-
 //todo refactor
-void CGameControllerEXP::TickTraps() {
-	for (int t = 0; t < m_CurTrap; t++)
-	{
-		if (!m_aTraps[t].m_Used)
+void CGameControllerEXP::TickTraps() {	
+	for (int t = 0; t < m_CurTrap; t++) {
+		CTrap *trap = &m_aTraps[t];
+		bool isOnCooldown = Server()->Tick() < trap->m_Timer;
+		if (!trap->m_Used || isOnCooldown) {
 			continue;
-		if (Server()->Tick() < m_aTraps[t].m_Timer)
-			continue;
+		}
 
-		CCharacter *apCloseChars[MAX_CLIENTS];
-		int num = GameServer()->m_World.FindEntities(m_aTraps[t].m_Pos, 600.0f, (CEntity**)apCloseChars, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-		for (int i = 0; i < num; i++)
-		{
-			if (!apCloseChars[i] || apCloseChars[i]->GetPlayer()->IsBot() || GameServer()->Collision()->IntersectLine(m_aTraps[t].m_Pos, apCloseChars[i]->GetPos(), NULL, NULL, false))
+		float maxRange = 600.0f;
+		vec2 trapPos = trap->m_Pos;
+		CCharacter* closestChars[MAX_CLIENTS];
+		int amountPlayersCloseBy = GameServer()->m_World.FindEntities(trapPos, maxRange, (CEntity**)closestChars, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+
+		for (int i = 0; i < amountPlayersCloseBy; i++) {
+			CCharacter* character = closestChars[i];
+			vec2 charPos = character->GetPos();
+
+			bool isBot = character->GetPlayer()->IsBot();
+			bool hasNoLineOfSight = GameServer()->Collision()->IntersectLine(trapPos, charPos, NULL, NULL, false);
+
+			if (isBot || hasNoLineOfSight) {
 				continue;
-			if (apCloseChars[i]->GetPos().y > m_aTraps[t].m_Pos.y && apCloseChars[i]->GetPos().x > m_aTraps[t].m_Pos.x - 64 && apCloseChars[i]->GetPos().x < m_aTraps[t].m_Pos.x + 64)
-			{
-				new CProjectile(&GameServer()->m_World, WEAPON_GRENADE, -1, m_aTraps[t].m_Pos, vec2(0, 1), (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime), 5, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
-				m_aTraps[t].m_Timer = Server()->Tick() + g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Firedelay*Server()->TickSpeed() / 1000.0f;
-				GameServer()->CreateSound(m_aTraps[t].m_Pos, SOUND_GRENADE_FIRE);
+			}
+			
+			//todo built traps that shoot up, left, right?
+			bool characterBelowTrap = charPos.y > trapPos.y;
+			bool characterInHorizontalRange = (charPos.x > trapPos.x - 64) && (charPos.x < trapPos.x + 64);
+
+			if (characterBelowTrap && characterInHorizontalRange) {
+				vec2 dir = vec2(0, 1);
+				int lifeSpan = (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime);
+				int dmg = 5;
+				bool isExplosive = true;
+				new CProjectile(&GameServer()->m_World,	WEAPON_GRENADE,	-1, trapPos, dir, lifeSpan,	dmg, isExplosive, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
+				trap->m_Timer = Server()->Tick() + g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_Firedelay * Server()->TickSpeed() / 1000.0f;
+				GameServer()->CreateSound(trapPos, SOUND_GRENADE_FIRE);
 				break;
 			}
 		}
