@@ -165,10 +165,6 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_Items.m_Lives++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					if (m_FromDrop)
-					{
-						GameServer()->m_World.DestroyEntity(this);
-					}
 				}
 				break;
 			
@@ -185,10 +181,6 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_Items.m_MinorPotions++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					if (m_FromDrop)
-					{
-						GameServer()->m_World.DestroyEntity(this);
-					}
 				}
 				break;
 			
@@ -205,10 +197,6 @@ void CPickup::Tick()
 					pPlayer->m_GameExp.m_Items.m_GreaterPotions++;
 						
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-					if (m_FromDrop)
-					{
-						GameServer()->m_World.DestroyEntity(this);
-					}
 				}
 				break;
 
@@ -216,7 +204,9 @@ void CPickup::Tick()
 				break;
 		};
 
-		if(RespawnTime >= 0)
+		if (m_FromDrop) {
+			GameServer()->m_World.DestroyEntity(this);
+		} else if(RespawnTime >= 0)
 			m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 	}
 
