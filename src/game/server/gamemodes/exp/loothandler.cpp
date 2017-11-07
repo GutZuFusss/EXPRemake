@@ -29,9 +29,9 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 			droprates[LOOT_NINJA] = 0.00f;
 			break;
 		case 1:
-			droprates[LOOT_GUN] = 0.02f;
-			droprates[LOOT_GRENADE] = 0.08f;
-			droprates[LOOT_SHOTGUN] = 0.10f;
+			droprates[LOOT_GRENADE] = 0.01f;
+			droprates[LOOT_SHOTGUN] = 0.03f;
+			droprates[LOOT_GUN] = 0.16f;
 			droprates[LOOT_HEALTHPOTION] = 0.32f;
 			droprates[LOOT_HEALTH] = 0.48f;
 			droprates[LOOT_ARMOR] = 0.00f;
@@ -46,7 +46,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 			droprates[LOOT_GRENADE] = 0.0f;
 			droprates[LOOT_SHOTGUN] = 0.00f;
 			droprates[LOOT_LASER] = 0.00f;
-			droprates[LOOT_NINJA] = 1.00f;
+			droprates[LOOT_NINJA] = 0.20f;
 			break;
 		case 3:
 			droprates[LOOT_HEALTH] = 0.01f;
