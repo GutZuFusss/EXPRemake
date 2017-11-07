@@ -7,10 +7,22 @@ enum
 	MAX_BOT_SPAWNS=256 //per level
 };
 
+enum
+{
+	BOTTYPE_HAMMER,
+	BOTTYPE_PISTOLERO,
+	BOTTYPE_SHOTGUN,
+	BOTTYPE_GRENADE,
+	BOTTYPE_LASER,
+	BOTTYPE_THOR,
+	BOTTYPE_GEILON,
+	BOTTYPE_BOSS
+};
+
 struct CBotSpawn
 {
 	vec2 m_Pos;
-	int m_Level;
+	int m_BotType;
 	bool m_Spawned;
 	int m_RespawnTimer;
 };

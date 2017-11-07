@@ -315,7 +315,7 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	m_Team = 1;
 	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], pSpawn->m_Pos);
 	GameServer()->CreatePlayerSpawn(pSpawn->m_Pos);
-	m_BotLevel = pSpawn->m_Level;
+	m_BotLevel = pSpawn->m_BotType;
 	m_pBotSpawn = pSpawn;
 	
 	m_pCharacter->m_Health = MaxHealth();

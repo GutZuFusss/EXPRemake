@@ -125,7 +125,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 	{
 		dbg_msg("exp", "bot spawn level %d added (%d)", lvl, m_aNumBotSpawns[lvl-1]);
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Pos = Pos;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Level = lvl;
+		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_BotType = lvl;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Spawned = false;
 		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
 		m_aNumBotSpawns[lvl-1]++;
@@ -139,7 +139,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 			dbg_msg("exp", "boss added");
 			m_Boss.m_Exist = true;
 			m_Boss.m_Spawn.m_Pos = Pos;
-			m_Boss.m_Spawn.m_Level = 4;
+			m_Boss.m_Spawn.m_BotType = 4;
 			m_Boss.m_Spawn.m_Spawned = false;
 			m_Boss.m_Spawn.m_RespawnTimer = Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed();
 		}
