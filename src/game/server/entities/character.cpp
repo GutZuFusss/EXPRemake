@@ -796,14 +796,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 void CCharacter::OnBotDeath(CPlayer* Killer, int Weapon) {
 	if (Killer && !Killer->IsBot()) {
-
-		//always drop a gun if the killer doesn't have one yet
-		if (!Killer->HasWeaponPermanently(WEAPON_GUN)) {
-			CLootHandler::DropWeapon(&GameServer()->m_World, m_Pos, WEAPON_GUN);
-		}
-		else {
-			CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotLevel);
-		}
+		CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotLevel);
 	}
 
 	if (m_pPlayer->m_BotLevel == 4) {
