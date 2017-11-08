@@ -115,53 +115,30 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		return true;
 	}
 
-	int botType = 0;
-
 	switch (Index) {
 	case ENTITY_SPAWN_BOT_LEVEL_1:
-		botType = BOTTYPE_PISTOL;
+		OnBotEntity(BOTTYPE_PISTOL, Pos);
 		break;
 	case ENTITY_SPAWN_BOT_LEVEL_2:
-		botType = BOTTYPE_NINJA;
+		OnBotEntity(BOTTYPE_NINJA, Pos);
 		break;
 	case ENTITY_SPAWN_BOT_LEVEL_3:
-		botType = BOTTYPE_SHOTGUN;
+		OnBotEntity(BOTTYPE_SHOTGUN, Pos);
+		break;
+	case ENTITY_SPAWN_BOSS:
+		if (m_Boss.m_Exist) {
+			dbg_msg("exp", "there can't be 2 boss entities on one map");
+			break;
+		}
+		OnBotEntity(BOTTYPE_BOSS, Pos);
+		dbg_msg("exp", "boss added");
 		break;
 	default:
 		break;
 	}
 
-	//todo extract as extra method which takes pos, BOT_TYPE as int?
-	if(botType != 0)
-	{
-		dbg_msg("exp", "bot spawn level %d added (%d)", botType, m_aNumBotSpawns[botType-1]);
-		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_Pos = Pos;
-		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_BotType = botType;
-		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_Spawned = false;
-		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
-		m_aNumBotSpawns[botType-1]++;
-	}
-
-
-
-
-
-
-	if(Index == ENTITY_SPAWN_BOSS)
-	{
-		if(m_Boss.m_Exist)
-			dbg_msg("exp", "there can't be 2 boss entities on one map");
-		else
-		{
-			dbg_msg("exp", "boss added");
-			m_Boss.m_Exist = true;
-			m_Boss.m_Spawn.m_Pos = Pos;
-			m_Boss.m_Spawn.m_BotType = BOTTYPE_BOSS;
-			m_Boss.m_Spawn.m_Spawned = false;
-			m_Boss.m_Spawn.m_RespawnTimer = Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed();
-		}
-	}
-	else if(Index == ENTITY_TURRET_LASER)
+	
+	if(Index == ENTITY_TURRET_LASER)
 	{
 		if(m_CurTurret < MAX_TURRETS)
 		{
@@ -266,7 +243,18 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		return true;
 	}
 
-	return true;
+	return false;
+}
+
+bool CGameControllerEXP::OnBotEntity(int BotType, vec2 pos) {
+	dbg_msg("exp", "bot spawn level %d added (%d)", BotType, m_aNumBotSpawns[BotType - 1]);
+	m_aaBotSpawns[BotType - 1][m_aNumBotSpawns[BotType - 1]].m_Pos = pos;
+	m_aaBotSpawns[BotType - 1][m_aNumBotSpawns[BotType - 1]].m_BotType = BotType;
+	m_aaBotSpawns[BotType - 1][m_aNumBotSpawns[BotType - 1]].m_Spawned = false;
+	m_aaBotSpawns[BotType - 1][m_aNumBotSpawns[BotType - 1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
+	m_aNumBotSpawns[BotType - 1]++;
+
+	return false;
 }
 
 bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)

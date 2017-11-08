@@ -37,6 +37,7 @@ public:
 	CGameControllerEXP(class CGameContext *pGameServer);
 	virtual void Tick();
 	virtual bool OnEntity(int Index, vec2 Pos);
+	bool OnBotEntity(int BotType, vec2 pos);
 	bool CheckCommand(int ClientID, int Team, const char *pMsg);
 
 	int m_CurTurret;
