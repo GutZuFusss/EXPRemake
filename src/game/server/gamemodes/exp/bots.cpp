@@ -22,7 +22,7 @@ void CGameControllerEXP::TickBots()
 		CPlayer *p = GameServer()->m_apPlayers[b];
 		if(!p || !p->GetCharacter())
 			continue;
-		if(p->m_BotLevel == 4)
+		if(p->m_BotType == 4)
 			continue;
 		
 		bool Nobody = true;
@@ -166,7 +166,7 @@ void CGameControllerEXP::BotSpawn(CBotSpawn *pSpawn)
 	//GameServer()->m_apPlayers[BID]->SetTeam(0);
 	pSpawn->m_Spawned = true;
 	
-	if(pSpawn->m_Level == 4)
+	if(pSpawn->m_BotType == 4)
 	{
 		m_Boss.m_ClientID = BID;
 		m_Boss.m_ShieldActive = false;

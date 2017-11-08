@@ -99,7 +99,7 @@ public:
 
 	// bots
 	struct CBotSpawn *m_pBotSpawn;
-	int m_BotLevel;
+	int m_BotType;
 	inline bool IsBot() { return m_Team == 1; };
 	void MakeBot(struct CBotSpawn *pSpawn);
 	void DestroyBot();

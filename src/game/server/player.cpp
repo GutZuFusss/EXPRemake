@@ -315,17 +315,17 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	m_Team = 1;
 	m_pCharacter->Spawn(GameServer()->m_apPlayers[m_ClientID], pSpawn->m_Pos);
 	GameServer()->CreatePlayerSpawn(pSpawn->m_Pos);
-	m_BotLevel = pSpawn->m_BotType;
+	m_BotType = pSpawn->m_BotType;
 	m_pBotSpawn = pSpawn;
 	
 	m_pCharacter->m_Health = MaxHealth();
 	m_pCharacter->m_Armor = MaxArmor();
 	
-	if(m_BotLevel == 1)
+	if(m_BotType == 1)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
 	}
-	else if(m_BotLevel == 2)
+	else if(m_BotType == 2)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
 
@@ -336,14 +336,14 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 		m_pCharacter->m_QueuedWeapon = WEAPON_KAMIKAZE;
 		m_pCharacter->m_ActiveWeapon = WEAPON_KAMIKAZE;
 	}
-	else if(m_BotLevel == 3)
+	else if(m_BotType == 3)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "twinbop", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
 	}
-	else if(m_BotLevel == 4)
+	else if(m_BotType == 4)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
 
@@ -355,26 +355,26 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 
 int CPlayer::MaxHealth()
 {
-	if(m_BotLevel == 1)
+	if(m_BotType == 1)
 		return 10;
-	else if(m_BotLevel == 2)
+	else if(m_BotType == 2)
 		return 8;
-	else if(m_BotLevel == 3)
+	else if(m_BotType == 3)
 		return 10;
-	else if(m_BotLevel == 4)
+	else if(m_BotType == 4)
 		return 200;
 	return 10;
 }
 
 int CPlayer::MaxArmor()
 {
-	if(m_BotLevel == 1)
+	if(m_BotType == 1)
 		return 0;
-	else if(m_BotLevel == 2)
+	else if(m_BotType == 2)
 		return 0;
-	else if(m_BotLevel == 3)
+	else if(m_BotType == 3)
 		return 5;
-	else if(m_BotLevel == 4)
+	else if(m_BotType == 4)
 		return 0;
 	return 10;
 }

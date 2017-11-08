@@ -114,21 +114,34 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 	if(IGameController::OnEntity(Index, Pos))
 		return true;
 
-	int lvl = 0;
+	int botType = 0;
+
+	switch (Index) {
+	case ENTITY_SPAWN_BOT_LEVEL_1:
+		botType = 1;
+		break;
+	case ENTITY_SPAWN_BOT_LEVEL_2:
+		botType = 2;
+		break;
+	case ENTITY_SPAWN_BOT_LEVEL_3:
+		botType = 3;
+		break;
+	}
+
 	if(Index == ENTITY_SPAWN_BOT_LEVEL_1)
-		lvl = 1;
+		botType = 1;
 	else if(Index == ENTITY_SPAWN_BOT_LEVEL_2)
-		lvl = 2;
+		botType = 2;
 	else if(Index == ENTITY_SPAWN_BOT_LEVEL_3)
-		lvl = 3;
-	if(lvl != 0)
+		botType = 3;
+	if(botType != 0)
 	{
-		dbg_msg("exp", "bot spawn level %d added (%d)", lvl, m_aNumBotSpawns[lvl-1]);
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Pos = Pos;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_BotType = lvl;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Spawned = false;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
-		m_aNumBotSpawns[lvl-1]++;
+		dbg_msg("exp", "bot spawn level %d added (%d)", botType, m_aNumBotSpawns[botType-1]);
+		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_Pos = Pos;
+		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_BotType = botType;
+		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_Spawned = false;
+		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
+		m_aNumBotSpawns[botType-1]++;
 	}
 	if(Index == ENTITY_SPAWN_BOSS)
 	{

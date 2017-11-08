@@ -796,10 +796,10 @@ void CCharacter::Die(int Killer, int Weapon)
 
 void CCharacter::OnBotDeath(CPlayer* Killer, int Weapon) {
 	if (Killer && !Killer->IsBot()) {
-		CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotLevel);
+		CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotType);
 	}
 
-	if (m_pPlayer->m_BotLevel == 4) {
+	if (m_pPlayer->m_BotType == 4) {
 		OnBossBotDeath();
 	}
 }
@@ -817,7 +817,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// debug...
 	//if(!m_pPlayer->IsBot())
 	//	return false;
-	if(m_pPlayer->IsBot() && m_pPlayer->m_BotLevel == 4)
+	if(m_pPlayer->IsBot() && m_pPlayer->m_BotType == 4)
 	{
 		if(From >= 0 && GameServer()->m_apPlayers[From])
 			GameServer()->m_apPlayers[From]->m_GameExp.m_BossHitter = true;
@@ -958,7 +958,7 @@ void CCharacter::Snap(int SnappingClient)
 	else
 		pCharacter->m_Weapon = m_ActiveWeapon;
 
-	if(m_pPlayer->m_BotLevel == 2 && !m_Frozen)
+	if(m_pPlayer->m_BotType == 2 && !m_Frozen)
 		m_AttackTick = Server()->Tick();
 
 	pCharacter->m_AttackTick = m_AttackTick;
@@ -994,7 +994,7 @@ void CCharacter::Freeze()
 	m_LastWeapon = m_ActiveWeapon;
 	m_ActiveWeapon = WEAPON_NINJA;
 	
-	if(m_pPlayer->m_BotLevel == 4)
+	if(m_pPlayer->m_BotType == 4)
 	{
 		CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
 		pBoss->m_ShieldHealth = 0;
@@ -1102,7 +1102,7 @@ void CCharacter::HandleBot()
 	if(!TargetChr)
 		return;
 	
-	if(m_pPlayer->m_BotLevel == 1)
+	if(m_pPlayer->m_BotType == 1)
 	{
 		//1) weapon :
 		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
@@ -1142,7 +1142,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 2)
+	else if(m_pPlayer->m_BotType == 2)
 	{
 		//1) move :
 		if(m_Pos.x < TargetChr->m_Pos.x)
@@ -1168,7 +1168,7 @@ void CCharacter::HandleBot()
 			m_Input.m_Fire = 1;
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 3)
+	else if(m_pPlayer->m_BotType == 3)
 	{
 		//1) weapon :
 		bool Shotgun = false;
@@ -1252,7 +1252,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 4)
+	else if(m_pPlayer->m_BotType == 4)
 	{
 		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
 		
