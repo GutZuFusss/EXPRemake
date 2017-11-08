@@ -166,7 +166,7 @@ void CGameControllerEXP::BotSpawn(CBotSpawn *pSpawn)
 	//GameServer()->m_apPlayers[BID]->SetTeam(0);
 	pSpawn->m_Spawned = true;
 	
-	if(pSpawn->m_BotType == BOTTYPE_BOSS)
+	if(pSpawn->m_BotType == BOTTYPE_ENDBOSS)
 	{
 		m_Boss.m_ClientID = BID;
 		m_Boss.m_ShieldActive = false;

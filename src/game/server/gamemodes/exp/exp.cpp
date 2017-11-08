@@ -130,7 +130,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 			dbg_msg("exp", "there can't be 2 boss entities on one map");
 			break;
 		}
-		OnBotEntity(BOTTYPE_BOSS, Pos);
+		OnBotEntity(BOTTYPE_ENDBOSS, Pos);
 		dbg_msg("exp", "boss added");
 		break;
 	default:

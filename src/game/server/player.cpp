@@ -343,7 +343,7 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
 	}
-	else if(m_BotType == BOTTYPE_BOSS)
+	else if(m_BotType == BOTTYPE_ENDBOSS)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
 
