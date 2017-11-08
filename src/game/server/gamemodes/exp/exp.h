@@ -79,8 +79,8 @@ public:
 	void RemoveBot(int ID, bool Killed);
 
 	// bots variables
-	CBotSpawn m_aaBotSpawns[BOT_LEVELS][MAX_BOT_SPAWNS];
-	int m_aNumBotSpawns[BOT_LEVELS];
+	CBotSpawn m_aaBotSpawns[NUM_BOTTYPES][MAX_BOT_SPAWNS]; //todo use list instead?
+	int m_aNumBotSpawns[NUM_BOTTYPES];
 	CBoss m_Boss;
 
 	//flags

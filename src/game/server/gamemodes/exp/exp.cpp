@@ -24,7 +24,7 @@ CGameControllerEXP::CGameControllerEXP(class CGameContext *pGameServer)
 	m_CurMine = 0;
 	m_CurTrap = 0;
 
-	for(int i = 0; i < BOT_LEVELS; i++)
+	for(int i = 0; i < NUM_BOTTYPES; i++)
 		m_aNumBotSpawns[i] = 0;
 	
 	for(int i = 0; i < MAX_CHECKPOINTS; i++)
@@ -111,29 +111,27 @@ void CGameControllerEXP::Tick()
 
 bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 {
-	if(IGameController::OnEntity(Index, Pos))
+	if (IGameController::OnEntity(Index, Pos)) {
 		return true;
+	}
 
 	int botType = 0;
 
 	switch (Index) {
 	case ENTITY_SPAWN_BOT_LEVEL_1:
-		botType = 1;
+		botType = BOTTYPE_PISTOL;
 		break;
 	case ENTITY_SPAWN_BOT_LEVEL_2:
-		botType = 2;
+		botType = BOTTYPE_NINJA;
 		break;
 	case ENTITY_SPAWN_BOT_LEVEL_3:
-		botType = 3;
+		botType = BOTTYPE_SHOTGUN;
+		break;
+	default:
 		break;
 	}
 
-	if(Index == ENTITY_SPAWN_BOT_LEVEL_1)
-		botType = 1;
-	else if(Index == ENTITY_SPAWN_BOT_LEVEL_2)
-		botType = 2;
-	else if(Index == ENTITY_SPAWN_BOT_LEVEL_3)
-		botType = 3;
+	//todo extract as extra method which takes pos, BOT_TYPE as int?
 	if(botType != 0)
 	{
 		dbg_msg("exp", "bot spawn level %d added (%d)", botType, m_aNumBotSpawns[botType-1]);
@@ -143,6 +141,12 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		m_aaBotSpawns[botType-1][m_aNumBotSpawns[botType-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
 		m_aNumBotSpawns[botType-1]++;
 	}
+
+
+
+
+
+
 	if(Index == ENTITY_SPAWN_BOSS)
 	{
 		if(m_Boss.m_Exist)
@@ -152,7 +156,7 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 			dbg_msg("exp", "boss added");
 			m_Boss.m_Exist = true;
 			m_Boss.m_Spawn.m_Pos = Pos;
-			m_Boss.m_Spawn.m_BotType = 4;
+			m_Boss.m_Spawn.m_BotType = BOTTYPE_BOSS;
 			m_Boss.m_Spawn.m_Spawned = false;
 			m_Boss.m_Spawn.m_RespawnTimer = Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed();
 		}

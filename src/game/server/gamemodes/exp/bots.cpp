@@ -53,7 +53,7 @@ void CGameControllerEXP::TickBots()
 	
 	
 	// CHECK FOR BOT SPAWNS
-	for(int l = 0; l < BOT_LEVELS; l++)
+	for(int l = 0; l < NUM_BOTTYPES; l++)
 	{
 		for(int s = 0; s < m_aNumBotSpawns[l]; s++)
 		{
@@ -166,7 +166,7 @@ void CGameControllerEXP::BotSpawn(CBotSpawn *pSpawn)
 	//GameServer()->m_apPlayers[BID]->SetTeam(0);
 	pSpawn->m_Spawned = true;
 	
-	if(pSpawn->m_BotType == 4)
+	if(pSpawn->m_BotType == BOTTYPE_BOSS)
 	{
 		m_Boss.m_ClientID = BID;
 		m_Boss.m_ShieldActive = false;

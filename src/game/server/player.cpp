@@ -321,11 +321,11 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	m_pCharacter->m_Health = MaxHealth();
 	m_pCharacter->m_Armor = MaxArmor();
 	
-	if(m_BotType == 1)
+	if(m_BotType == BOTTYPE_PISTOL)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
 	}
-	else if(m_BotType == 2)
+	else if(m_BotType == BOTTYPE_NINJA)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
 
@@ -336,14 +336,14 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 		m_pCharacter->m_QueuedWeapon = WEAPON_KAMIKAZE;
 		m_pCharacter->m_ActiveWeapon = WEAPON_KAMIKAZE;
 	}
-	else if(m_BotType == 3)
+	else if(m_BotType == BOTTYPE_SHOTGUN)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "twinbop", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
 		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
 	}
-	else if(m_BotType == 4)
+	else if(m_BotType == BOTTYPE_BOSS)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
 
