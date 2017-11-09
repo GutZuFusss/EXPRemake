@@ -66,8 +66,4 @@ enum
 	WEAPON_FREEZER,
 };
 
-enum 
-{
-	POWERUP_MINOR_POTION = 7,
-};
 #endif

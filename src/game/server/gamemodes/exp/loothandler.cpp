@@ -22,7 +22,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 			droprates[LOOT_GUN] = 0.02f;
 			droprates[LOOT_GRENADE] = 0.08f;
 			droprates[LOOT_SHOTGUN] = 0.10f;
-			droprates[LOOT_HEALTHPOTION] = 0.32f;
+			droprates[LOOT_POTION] = 0.32f;
 			droprates[LOOT_HEALTH] = 0.48f;
 			droprates[LOOT_ARMOR] = 0.00f;
 			droprates[LOOT_LASER] = 0.00f;
@@ -32,7 +32,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 			droprates[LOOT_GRENADE] = 0.01f;
 			droprates[LOOT_SHOTGUN] = 0.03f;
 			droprates[LOOT_GUN] = 0.16f;
-			droprates[LOOT_HEALTHPOTION] = 0.32f;
+			droprates[LOOT_POTION] = 0.32f;
 			droprates[LOOT_HEALTH] = 0.48f;
 			droprates[LOOT_ARMOR] = 0.00f;
 			droprates[LOOT_LASER] = 0.00f;
@@ -41,7 +41,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 		case 2:
 			droprates[LOOT_HEALTH] = 0.0f;
 			droprates[LOOT_ARMOR] = 0.0f;
-			droprates[LOOT_HEALTHPOTION] = 0.00f;
+			droprates[LOOT_POTION] = 0.00f;
 			droprates[LOOT_GUN] = 0.0f;
 			droprates[LOOT_GRENADE] = 0.0f;
 			droprates[LOOT_SHOTGUN] = 0.00f;
@@ -51,7 +51,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 		case 3:
 			droprates[LOOT_HEALTH] = 0.01f;
 			droprates[LOOT_ARMOR] = 0.00f;
-			droprates[LOOT_HEALTHPOTION] = 0.01f;
+			droprates[LOOT_POTION] = 0.01f;
 			droprates[LOOT_GUN] = 0.01f;
 			droprates[LOOT_GRENADE] = 0.01f;
 			droprates[LOOT_SHOTGUN] = 0.01f;
@@ -61,7 +61,7 @@ void CLootHandler::DropRandomLoot(CGameWorld *pGameWorld, vec2 Pos, int BotType)
 		default:
 			droprates[LOOT_HEALTH] = 0.0f;
 			droprates[LOOT_ARMOR] = 0.0f;
-			droprates[LOOT_HEALTHPOTION] = 0.0f;
+			droprates[LOOT_POTION] = 0.0f;
 			droprates[LOOT_GUN] = 0.0f;
 			droprates[LOOT_GRENADE] = 0.0f;
 			droprates[LOOT_SHOTGUN] = 0.0f;
@@ -95,8 +95,8 @@ const std::pair<int, int> CLootHandler::LootToPickup(const int LootId) {
 		return std::pair<int, int>(0, 0);
 	case LOOT_ARMOR:
 		return std::pair<int, int>(1, 0);
-	case LOOT_HEALTHPOTION:
-		return std::pair<int, int>(8, 0); //= smaller Potion
+	case LOOT_POTION:
+		return std::pair<int, int>(4, 0); //= Potion
 	case LOOT_GUN:
 		return std::pair<int, int>(2, 1);
 	case LOOT_GRENADE:

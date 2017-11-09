@@ -151,24 +151,21 @@ void CPickup::Tick()
 				break;
 			}
 			
-			case POWERUP_MINOR_POTION:
+			case POWERUP_POTION:
+			{
+				if(pPlayer->m_GameExp.m_Items.m_Potions == 0)
+					GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: <POTION>. Use it with /potion");
+				else
 				{
-					if(pPlayer->m_GameExp.m_Items.m_MinorPotions == 0)
-						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: MINOR POTION. Say /items for more info.");
-					else
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Picked up: MINOR POTION (%d)", pPlayer->m_GameExp.m_Items.m_MinorPotions+1);
-						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
-					}
-					pPlayer->m_GameExp.m_Items.m_MinorPotions++;
-						
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "Picked up: <POTION> (%d)", pPlayer->m_GameExp.m_Items.m_Potions+1);
+					GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 				}
-				break;
-			
-			default:
-				break;
+				pPlayer->m_GameExp.m_Items.m_Potions++;
+						
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+			}
+			break;
 		};
 
 		if (m_FromDrop) {
@@ -177,7 +174,7 @@ void CPickup::Tick()
 			m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 	}
 
-	if(m_Type == POWERUP_MINOR_POTION)
+	if(m_Type == POWERUP_POTION)
 	{
 		if(Server()->Tick() > m_AnimationTimer)
 		{
@@ -283,8 +280,8 @@ const char *CPickup::GetWeaponName(int wid)
 
 int CPickup::RealPickup(int Type)
 {
-	if(Type == POWERUP_MINOR_POTION)
-		Type = POWERUP_HEALTH;
+	if(Type == POWERUP_POTION)
+		return POWERUP_HEALTH;
 	return Type;
 }
 

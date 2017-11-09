@@ -11,7 +11,7 @@
 
 struct CItems
 {
-	int m_MinorPotions;
+	int m_Potions;
 };
 
 enum

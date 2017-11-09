@@ -372,7 +372,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 void CGameControllerEXP::StartClient(int ID)
 {
 	GameServer()->m_apPlayers[ID]->KillCharacter(WEAPON_GAME);
-	CItems Items; Items.m_MinorPotions = 0;
+	CItems Items; Items.m_Potions = 0;
 	GameServer()->m_apPlayers[ID]->LoadNewGame(m_aaSpawnPoints[1][0]);
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick = Server()->Tick();
 	//SendItems(ID);
@@ -442,14 +442,14 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 	{
 		if(p->GetCharacter())
 		{
-			if(p->m_GameExp.m_Items.m_MinorPotions > 0)
+			if(p->m_GameExp.m_Items.m_Potions > 0)
 			{
 				if(p->GetCharacter()->m_Health < 10)
 				{
-					p->m_GameExp.m_Items.m_MinorPotions--;
+					p->m_GameExp.m_Items.m_Potions--;
 					p->GetCharacter()->m_Health = 10;
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "<Potion> used. You have %d <Potions> left.", p->m_GameExp.m_Items.m_MinorPotions);
+					str_format(aBuf, sizeof(aBuf), "<Potion> used. You have %d <Potions> left.", p->m_GameExp.m_Items.m_Potions);
 					GameServer()->SendChatTarget(ClientID, aBuf);
 				}
 				else
