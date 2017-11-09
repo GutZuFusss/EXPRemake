@@ -9,15 +9,6 @@
 #include "environment.h"
 #include "bots.h"
 
-enum
-{
-	ITEM_LIFE=0,
-	ITEM_MINOR_POTION,
-	ITEM_GREATER_POTION,
-	NUM_ITEMS
-};
-
-
 struct CItems
 {
 	int m_Lives;
