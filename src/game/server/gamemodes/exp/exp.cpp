@@ -302,9 +302,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, " ");
 		GameServer()->SendChatTarget(ClientID, "Check out '/bind' to learn how to bind items.");
 		GameServer()->SendChatTarget(ClientID, "Weapons: You keep it when you have it.");
-		GameServer()->SendChatTarget(ClientID, "Life: You can use it to respawn where you died.");
-		GameServer()->SendChatTarget(ClientID, "Minor Potion: Use it to get full health.");
-		GameServer()->SendChatTarget(ClientID, "Greater Potion: Use it to get full health and full armor.");
+		GameServer()->SendChatTarget(ClientID, "Potion: Use it to restore health.");
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
@@ -342,8 +340,8 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "1) Open the Local Console (F1).");
 		GameServer()->SendChatTarget(ClientID, "2) Type \"bind <key> say <item>\"");
 		GameServer()->SendChatTarget(ClientID, "Replace <key> by the key you want to press.");
-		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: life, minor or greater.");
-		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say life\"");
+		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: potion.");
+		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say potion\"");
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
@@ -354,21 +352,9 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		return true;
 	}
 	
-	else if(!strncmp(aMsg, "/life", 5) || !strncmp(aMsg, "life", 4))
+	else if(!strncmp(aMsg, "/potion", 7) || !strncmp(aMsg, "potion", 7))
 	{
-		Use(ClientID, "Life");
-		return true;
-	}
-
-	else if(!strncmp(aMsg, "/minor", 6) || !strncmp(aMsg, "minor", 5))
-	{
-		Use(ClientID, "Minor Potion");
-		return true;
-	}
-
-	else if(!strncmp(aMsg, "/greater", 8) || !strncmp(aMsg, "greater", 7))
-	{
-		Use(ClientID, "Greater Potion");
+		Use(ClientID, "Potion");
 		return true;
 	}
 	
@@ -452,27 +438,7 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 {
 	CPlayer *p = GameServer()->m_apPlayers[ClientID];
 	
-	if(str_find_nocase(aCommand, "Life"))
-	{
-		if(p->m_GameExp.m_Items.m_Lives > 0)
-		{
-			if(p->GetTeam() != -1 && !p->GetCharacter())
-			{
-				p->m_GameExp.m_Items.m_Lives--;
-				p->LoadGame(p->m_ViewPos, p->m_GameExp.m_Time);
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Life used. %d lives left.", p->m_GameExp.m_Items.m_Lives);
-				GameServer()->SendChatTarget(ClientID, aBuf);
-			}
-			else
-				GameServer()->SendChatTarget(ClientID, "You are not dead!");
-		}
-		else
-			GameServer()->SendChatTarget(ClientID, "You haven't got a life!");
-		return true;
-	}
-
-	else if(str_find_nocase(aCommand, "Minor Potion"))
+	if(str_find_nocase(aCommand, "Potion"))
 	{
 		if(p->GetCharacter())
 		{
@@ -483,37 +449,14 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 					p->m_GameExp.m_Items.m_MinorPotions--;
 					p->GetCharacter()->m_Health = 10;
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "Minor Potion used. You have %d Minor Potions left.", p->m_GameExp.m_Items.m_MinorPotions);
+					str_format(aBuf, sizeof(aBuf), "<Potion> used. You have %d <Potions> left.", p->m_GameExp.m_Items.m_MinorPotions);
 					GameServer()->SendChatTarget(ClientID, aBuf);
 				}
 				else
 					GameServer()->SendChatTarget(ClientID, "You don't need to use that now!");
 			}
 			else
-				GameServer()->SendChatTarget(ClientID, "You haven't got a Minor Potion!");
-		}
-		return true;
-	}
-
-	else if(str_find_nocase(aCommand, "Greater Potion"))
-	{
-		if(p->GetCharacter())
-		{
-			if(p->m_GameExp.m_Items.m_GreaterPotions > 0)
-			{
-				if(p->GetCharacter()->m_Health < 10)
-				{
-					p->m_GameExp.m_Items.m_GreaterPotions--;
-					p->GetCharacter()->m_Health = 10;
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "Greater Potion used. You have %d Greater Potions left.", p->m_GameExp.m_Items.m_GreaterPotions);
-					GameServer()->SendChatTarget(ClientID, aBuf);
-				}
-				else
-					GameServer()->SendChatTarget(ClientID, "You don't need to use that now!");
-			}
-			else
-				GameServer()->SendChatTarget(ClientID, "You haven't got a Greater Potion!");
+				GameServer()->SendChatTarget(ClientID, "You haven't got a <Potion>!");
 		}
 		return true;
 	}
