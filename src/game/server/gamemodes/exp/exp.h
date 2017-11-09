@@ -11,7 +11,6 @@
 
 struct CItems
 {
-	int m_Lives;
 	int m_MinorPotions;
 	int m_GreaterPotions;
 };

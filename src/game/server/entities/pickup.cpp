@@ -150,23 +150,6 @@ void CPickup::Tick()
 				}
 				break;
 			}
-
-			case POWERUP_LIFE:
-				{
-					if(pPlayer->m_GameExp.m_Items.m_Lives == 0)
-						GameServer()->SendChatTarget(pPlayer->GetCID(), "Picked up: LIFE. Say /items for more info.");
-					else
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Picked up: LIFE (%d)", pPlayer->m_GameExp.m_Items.m_Lives+1);
-						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
-					}
-	
-					pPlayer->m_GameExp.m_Items.m_Lives++;
-						
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-				}
-				break;
 			
 			case POWERUP_MINOR_POTION:
 				{
@@ -316,9 +299,7 @@ const char *CPickup::GetWeaponName(int wid)
 
 int CPickup::RealPickup(int Type)
 {
-	if(Type == POWERUP_LIFE)
-		Type = POWERUP_HEALTH;
-	else if(Type == POWERUP_MINOR_POTION || Type == POWERUP_GREATER_POTION)
+	if(Type == POWERUP_MINOR_POTION || Type == POWERUP_GREATER_POTION)
 		Type = POWERUP_HEALTH;
 	return Type;
 }
