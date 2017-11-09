@@ -321,33 +321,35 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	m_pCharacter->m_Health = MaxHealth();
 	m_pCharacter->m_Armor = MaxArmor();
 	
-	if(m_BotType == BOTTYPE_PISTOL)
-	{
-		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
-	}
-	else if(m_BotType == BOTTYPE_KAMIKAZE)
-	{
-		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
+	switch (m_BotType) {
 
+	case BOTTYPE_PISTOL:
+		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
+		break;
+	
+	case BOTTYPE_KAMIKAZE:
+		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
 		m_pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got = false;
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
 		m_pCharacter->GiveWeapon(WEAPON_KAMIKAZE, -1);
 		m_pCharacter->m_QueuedWeapon = WEAPON_KAMIKAZE;
 		m_pCharacter->m_ActiveWeapon = WEAPON_KAMIKAZE;
-	}
-	else if(m_BotType == BOTTYPE_SHOTGUN)
-	{
+		break;
+	
+	case BOTTYPE_SHOTGUN:
 		str_copy(m_TeeInfos.m_SkinName, "twinbop", sizeof(m_TeeInfos.m_SkinName));
-
 		m_pCharacter->GiveWeapon(WEAPON_SHOTGUN, -1);
-	}
-	else if(m_BotType == BOTTYPE_ENDBOSS)
-	{
+		break;
+	
+	case BOTTYPE_ENDBOSS:
 		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
-
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
 		m_pCharacter->GiveWeapon(WEAPON_FREEZER, -1);
-	}
+		break;
+	
+	default:
+		break;
+	};
 }
 
 int CPlayer::MaxHealth()
