@@ -59,11 +59,4 @@ enum
 	MAX_DOORS=128
 };
 
-enum
-{
-	// assume the other 5 weapons here, so '6' is after 'Rifle' when scrolling
-	WEAPON_KAMIKAZE = 6,
-	WEAPON_FREEZER,
-};
-
 #endif

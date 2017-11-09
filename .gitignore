@@ -6,6 +6,7 @@ datasrc/*.pyc
 objs
 src/game/generated/*
 !src/game/generated/server_data.cpp
+!src/game/generated/protocol.h
 SDL.dll
 freetype.dll
 saves.db
