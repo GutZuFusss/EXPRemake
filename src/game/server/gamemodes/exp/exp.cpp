@@ -116,6 +116,9 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 	}
 
 	switch (Index) {
+	case ENTITY_SPAWN_BOT_HAMMER:
+		OnBotEntity(BOTTYPE_HAMMER, Pos);
+		break;
 	case ENTITY_SPAWN_BOT_PISTOL:
 		OnBotEntity(BOTTYPE_PISTOL, Pos);
 		break;
