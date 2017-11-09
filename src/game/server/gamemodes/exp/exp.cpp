@@ -372,7 +372,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 void CGameControllerEXP::StartClient(int ID)
 {
 	GameServer()->m_apPlayers[ID]->KillCharacter(WEAPON_GAME);
-	CItems Items; Items.m_MinorPotions = 0; Items.m_GreaterPotions = 0;
+	CItems Items; Items.m_MinorPotions = 0;
 	GameServer()->m_apPlayers[ID]->LoadNewGame(m_aaSpawnPoints[1][0]);
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick = Server()->Tick();
 	//SendItems(ID);

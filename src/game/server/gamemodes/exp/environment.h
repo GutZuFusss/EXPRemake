@@ -69,6 +69,5 @@ enum
 enum 
 {
 	POWERUP_MINOR_POTION = 7,
-	POWERUP_GREATER_POTION,
 };
 #endif
