@@ -262,14 +262,14 @@ bool CGameControllerEXP::OnBotEntity(int BotType, vec2 pos) {
 
 bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 {
-	if(!strncmp(aMsg, "/info", 5) || !strncmp(aMsg, "!info", 5) || !strncmp(aMsg, "/help", 5))
+	if(!strncmp(aMsg, "/info", 5) || !strncmp(aMsg, "!info", 5) || !strncmp(aMsg, "/help", 5) || !strncmp(aMsg, "/about", 6))
 	{
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		GameServer()->SendChatTarget(ClientID, "EXPlorer v2.0");
-		GameServer()->SendChatTarget(ClientID, "based on the EXPlorer mod by <xush'> and <Choupom>.");
-		GameServer()->SendChatTarget(ClientID, "You have to explore the map, fight monsters, and find the blue flag.");
-		GameServer()->SendChatTarget(ClientID, "Kill monsters to earn items (say /items for more info).");
-		GameServer()->SendChatTarget(ClientID, "Say /cmdlist for the command list.");
+		GameServer()->SendChatTarget(ClientID, "Based on the EXPlorer mod by <xush'> and <Choupom>");
+		GameServer()->SendChatTarget(ClientID, "Aim: explore, fight and eventually capture the blue flag");
+		GameServer()->SendChatTarget(ClientID, "Kill monsters to earn /items");
+		GameServer()->SendChatTarget(ClientID, "Say /cmdlist for the command list");
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
@@ -294,7 +294,7 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "'/items': Get info about the items.");
 		GameServer()->SendChatTarget(ClientID, "'/new': Restart the game.");
 		GameServer()->SendChatTarget(ClientID, "'/bind': Learn how to bind a key to use an item.");
-		GameServer()->SendChatTarget(ClientID, "'/game': Show your weapons, kills, armor, etc.");
+		GameServer()->SendChatTarget(ClientID, "'/game': Shows your weapons and kills.");
 		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
