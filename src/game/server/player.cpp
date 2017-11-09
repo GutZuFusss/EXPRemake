@@ -331,8 +331,7 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 
 		m_pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got = false;
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
-		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_KAMIKAZE].m_Ammo = -1;
+		m_pCharacter->GiveWeapon(WEAPON_KAMIKAZE, -1);
 		m_pCharacter->m_QueuedWeapon = WEAPON_KAMIKAZE;
 		m_pCharacter->m_ActiveWeapon = WEAPON_KAMIKAZE;
 	}
@@ -340,16 +339,14 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "twinbop", sizeof(m_TeeInfos.m_SkinName));
 
-		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Ammo = 10;
+		m_pCharacter->GiveWeapon(WEAPON_SHOTGUN, -1);
 	}
 	else if(m_BotType == BOTTYPE_ENDBOSS)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "bluekitty", sizeof(m_TeeInfos.m_SkinName));
 
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
-		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Got = true;
-		m_pCharacter->m_aWeapons[WEAPON_FREEZER].m_Ammo = -1;
+		m_pCharacter->GiveWeapon(WEAPON_FREEZER, -1);
 	}
 }
 
