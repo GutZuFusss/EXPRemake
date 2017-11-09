@@ -261,15 +261,13 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 {
 	if(!strncmp(aMsg, "/info", 5) || !strncmp(aMsg, "!info", 5) || !strncmp(aMsg, "/help", 5))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                        EXPlorer");
-		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "Version 1.0 | by xush', original idea and mod by Choupom.");
-		GameServer()->SendChatTarget(ClientID, "You have to explore the map, fight monsters, collect items...");
-		GameServer()->SendChatTarget(ClientID, "Kill a monster to earn an Item (say /items for more info).");
-		GameServer()->SendChatTarget(ClientID, " ");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "EXPlorer v2.0");
+		GameServer()->SendChatTarget(ClientID, "based on the EXPlorer mod by <xush'> and <Choupom>.");
+		GameServer()->SendChatTarget(ClientID, "You have to explore the map, fight monsters, and find the blue flag.");
+		GameServer()->SendChatTarget(ClientID, "Kill monsters to earn items (say /items for more info).");
 		GameServer()->SendChatTarget(ClientID, "Say /cmdlist for the command list.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/top5", 5))
@@ -285,8 +283,8 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 	else if(!strncmp(aMsg, "/cmdlist", 8) || !strncmp(aMsg, "/cmd", 4))
 	{
 		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                    COMMAND LIST");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "COMMAND LIST");
 		GameServer()->SendChatTarget(ClientID, "");
 		GameServer()->SendChatTarget(ClientID, "'/info': Get info about the modification.");
 		GameServer()->SendChatTarget(ClientID, "'/top5': View the top 5 players.");
@@ -294,26 +292,26 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		GameServer()->SendChatTarget(ClientID, "'/new': Restart the game.");
 		GameServer()->SendChatTarget(ClientID, "'/bind': Learn how to bind a key to use an item.");
 		GameServer()->SendChatTarget(ClientID, "'/game': Show your weapons, kills, armor, etc.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/items", 6))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                           ITEMS");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "ITEMS");
 		GameServer()->SendChatTarget(ClientID, " ");
 		GameServer()->SendChatTarget(ClientID, "Check out '/bind' to learn how to bind items.");
 		GameServer()->SendChatTarget(ClientID, "Weapons: You keep it when you have it.");
 		GameServer()->SendChatTarget(ClientID, "Life: You can use it to respawn where you died.");
 		GameServer()->SendChatTarget(ClientID, "Minor Potion: Use it to get full health.");
 		GameServer()->SendChatTarget(ClientID, "Greater Potion: Use it to get full health and full armor.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/game", 5))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                            GAME");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "GAME");
 		GameServer()->SendChatTarget(ClientID, " ");
 		
 		char aBuf[256] = {0};
@@ -332,21 +330,21 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		str_format(aBuf, sizeof(aBuf), "Kills: %d", GameServer()->m_apPlayers[ClientID]->m_Score);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	
 	else if(!strncmp(aMsg, "/bind", 5))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                              BIND DOCUMENTATION");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "BIND DOCUMENTATION");
 		GameServer()->SendChatTarget(ClientID, "");
 		GameServer()->SendChatTarget(ClientID, "1) Open the Local Console (F1).");
 		GameServer()->SendChatTarget(ClientID, "2) Type \"bind <key> say <item>\"");
 		GameServer()->SendChatTarget(ClientID, "Replace <key> by the key you want to press.");
 		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: life, minor or greater.");
 		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say life\"");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	
