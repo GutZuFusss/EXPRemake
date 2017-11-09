@@ -1102,7 +1102,7 @@ void CCharacter::HandleBot()
 	if(!TargetChr)
 		return;
 	
-	if(m_pPlayer->m_BotType == 1)
+	if(m_pPlayer->m_BotType == BOTTYPE_PISTOL)
 	{
 		//1) weapon :
 		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
@@ -1142,7 +1142,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotType == 2)
+	else if(m_pPlayer->m_BotType == BOTTYPE_KAMIKAZE)
 	{
 		//1) move :
 		if(m_Pos.x < TargetChr->m_Pos.x)
@@ -1168,7 +1168,7 @@ void CCharacter::HandleBot()
 			m_Input.m_Fire = 1;
 		}
 	}
-	else if(m_pPlayer->m_BotType == 3)
+	else if(m_pPlayer->m_BotType == BOTTYPE_SHOTGUN)
 	{
 		//1) weapon :
 		bool Shotgun = false;
@@ -1252,7 +1252,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotType == 4)
+	else if(m_pPlayer->m_BotType == BOTTYPE_ENDBOSS)
 	{
 		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
 		
