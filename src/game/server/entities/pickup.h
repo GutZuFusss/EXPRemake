@@ -7,8 +7,8 @@
 
 const int PickupPhysSize = 14;
 
-class CPickup : public CEntity
-{
+class CPickup : public CEntity {
+
 public:
 	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0);
 	CPickup(CGameWorld *pGameWorld, vec2 Pos, int Type, int SubType = 0);
@@ -19,8 +19,8 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	// EXP
-	bool m_FromDrop;
-	float m_AnimationTimer;
+	bool m_IsDrop;
+	
 	float m_DieTimer;
 	bool m_IsBossShield;
 	
@@ -34,6 +34,13 @@ private:
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;
+	float m_AnimationTimer;
+
+	void TickRespawn();
+	void TickLifetime();
+	void TickAnims();
+	void TickPotionAnim();
+	void TickPickup();
 };
 
 #endif
