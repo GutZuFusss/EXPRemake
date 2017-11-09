@@ -327,7 +327,7 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 		m_pCharacter->m_aWeapons[WEAPON_GUN].m_Got = false;
 		break;
 
-	case BOTTYPE_PISTOL:
+	case BOTTYPE_GUN:
 		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
 		break;
 	
