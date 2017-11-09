@@ -1102,7 +1102,7 @@ void CCharacter::HandleBot()
 	if(!TargetChr)
 		return;
 	
-	if(m_pPlayer->m_BotType == BOTTYPE_PISTOL)
+	if(m_pPlayer->m_BotType == BOTTYPE_GUN)
 	{
 		//1) weapon :
 		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
