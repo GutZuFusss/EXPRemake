@@ -325,7 +325,7 @@ void CPlayer::MakeBot(CBotSpawn *pSpawn)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "brownbear", sizeof(m_TeeInfos.m_SkinName));
 	}
-	else if(m_BotType == BOTTYPE_NINJA)
+	else if(m_BotType == BOTTYPE_KAMIKAZE)
 	{
 		str_copy(m_TeeInfos.m_SkinName, "x_ninja", sizeof(m_TeeInfos.m_SkinName));
 
