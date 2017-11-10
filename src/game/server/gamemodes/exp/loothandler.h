@@ -4,6 +4,7 @@
 #include "../../../../base/vmath.h"
 #include "../../gamecontext.h"
 #include "../../entities/pickup.h"
+#include "../../entities/drop.h"
 #include <map>
 #include <tuple>
 

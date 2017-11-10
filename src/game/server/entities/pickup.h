@@ -11,18 +11,12 @@ class CPickup : public CEntity {
 
 public:
 	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0);
-	CPickup(CGameWorld *pGameWorld, vec2 Pos, int Type, int SubType = 0);
 
 	virtual void Reset();
 	virtual void Tick();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
-	// EXP
-	bool m_IsDrop;
-	
-	float m_DieTimer;
-	bool m_IsBossShield;
 	
 	const char *GetWeaponName(int wid);
 	int RealPickup(int Type);
@@ -30,7 +24,7 @@ public:
 	void CreateRandomFromTurret(int TurretType, vec2 Pos);
 	void MakeBossShield();
 
-private:
+protected:
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;
@@ -39,6 +33,7 @@ private:
 	void TickAnims();
 	void TickPotionAnim();
 	void TickPickup();
+	virtual void HandleRespawn(int RespawnTime);
 };
 
 #endif

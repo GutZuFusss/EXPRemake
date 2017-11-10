@@ -113,15 +113,15 @@ const std::pair<int, int> CLootHandler::LootToPickup(const int LootId) {
 }
 
 void CLootHandler::DropLoot(CGameWorld *pGameWorld, vec2 Pos, std::pair<int, int> Type) {
-	new CPickup(pGameWorld, Pos, Type.first, Type.second);
+	new CDrop(pGameWorld, Pos, Type.first, Type.second);
 }
 
 void CLootHandler::DropWeapon(CGameWorld *pGameWorld, vec2 Pos, int Type) {
-	new CPickup(pGameWorld, Pos, POWERUP_WEAPON, Type);
+	new CDrop(pGameWorld, Pos, POWERUP_WEAPON, Type);
 }
 
 void CLootHandler::DropItem(CGameWorld *pGameWorld, vec2 Pos, int Type) {
-	new CPickup(pGameWorld, Pos, Type, 0);
+	new CDrop(pGameWorld, Pos, Type, 0);
 }
 
 

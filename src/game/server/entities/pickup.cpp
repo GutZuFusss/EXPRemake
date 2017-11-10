@@ -12,9 +12,6 @@
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
-	m_IsDrop = false;
-	m_DieTimer = Server()->Tick();
-
 	m_Type = Type;
 	m_Subtype = SubType;
 	m_ProximityRadius = PickupPhysSize;
@@ -22,30 +19,10 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType)
 	Reset();
 
 	GameWorld()->InsertEntity(this);
-}
-
-CPickup::CPickup(CGameWorld *pGameWorld, vec2 Pos, int Type, int SubType)
-	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
-{
-	m_Pos = Pos;
-	m_DieTimer = Server()->Tick();
-	m_ProximityRadius = PickupPhysSize;
-
-	Reset();
-	m_IsDrop = true;
-	GameWorld()->InsertEntity(this);
-	m_Type = Type;
-	m_Subtype = SubType;
 }
 
 void CPickup::Reset()
 {
-	if(m_IsDrop)
-	{
-		GameWorld()->DestroyEntity(this);
-		return;
-	}
-
 	if(g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * g_pData->m_aPickups[m_Type].m_Spawndelay;
 	else
@@ -54,9 +31,6 @@ void CPickup::Reset()
 
 void CPickup::Tick()
 {
-	if(m_IsBossShield || m_MarkedForDestroy)
-		return;
-
 	// wait for respawn
 	if (m_SpawnTick > 0) {
 		if (Server()->Tick() > m_SpawnTick) {
@@ -68,12 +42,6 @@ void CPickup::Tick()
 		}
 		else
 			return;
-	}
-
-	if (m_IsDrop) {
-		if (Server()->Tick() > m_DieTimer + GameServer()->Tuning()->m_PickupLifetime*Server()->TickSpeed()) {
-			GameWorld()->DestroyEntity(this);
-		}
 	}
 
 	TickAnims();
@@ -200,14 +168,15 @@ void CPickup::TickPickup() {
 				break;
 		};
 
-		if (m_IsDrop) {
-			GameServer()->m_World.DestroyEntity(this);
-		}
-		else if (RespawnTime >= 0) {
-			m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
-		}
+		HandleRespawn(RespawnTime);
 	}
 }
+
+void CPickup::HandleRespawn(int RespawnTime) {
+	if (RespawnTime >= 0)
+		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+}
+
 
 void CPickup::TickPaused()
 {
@@ -232,42 +201,12 @@ void CPickup::Snap(int SnappingClient)
 
 void CPickup::CreateRandomFromTurret(int TurretType, vec2 Pos)
 {
-	m_IsDrop = true;
-	m_Pos = Pos;
-
-	int r = Server()->Tick()%100; //r < 75
 	
-	if(r < 70)
-		m_Type = POWERUP_ARMOR; //70%
-	else
-	{
-		if(TurretType == TURRET_TYPE_LASER)
-		{
-			m_Type = POWERUP_WEAPON;
-			m_Subtype = WEAPON_RIFLE;
-		}
-		else if(TurretType == TURRET_TYPE_GUN)
-		{
-			m_Type = POWERUP_WEAPON;
-			m_Subtype = WEAPON_GUN;
-		}
-	}
-	
-	for(int id = 0; id < MAX_CLIENTS; id++)
-	{
-		if(GameServer()->m_apPlayers[id] && !GameServer()->m_apPlayers[id]->IsBot())
-			Snap(id);
-	}
 }
 
 void CPickup::MakeBossShield()
 {
-	m_IsBossShield = true;
-	for(int id = 0; id < MAX_CLIENTS; id++)
-	{
-		if(GameServer()->m_apPlayers[id] && !GameServer()->m_apPlayers[id]->IsBot())
-			Snap(id);
-	}
+
 }
 
 const char *CPickup::GetWeaponName(int wid)
