@@ -57,18 +57,9 @@ void CPickup::Tick()
 	if(m_IsBossShield || m_MarkedForDestroy)
 		return;
 
-	TickRespawn();
-	TickLifetime();
-	TickAnims();
-	TickPickup();	
-}
-
-void CPickup::TickRespawn() {
 	// wait for respawn
-	if (m_SpawnTick > 0)
-	{
-		if (Server()->Tick() > m_SpawnTick)
-		{
+	if (m_SpawnTick > 0) {
+		if (Server()->Tick() > m_SpawnTick) {
 			// respawn
 			m_SpawnTick = -1;
 
@@ -78,14 +69,15 @@ void CPickup::TickRespawn() {
 		else
 			return;
 	}
-}
 
-void CPickup::TickLifetime() {
 	if (m_IsDrop) {
 		if (Server()->Tick() > m_DieTimer + GameServer()->Tuning()->m_PickupLifetime*Server()->TickSpeed()) {
 			GameWorld()->DestroyEntity(this);
 		}
 	}
+
+	TickAnims();
+	TickPickup();	
 }
 
 void CPickup::TickAnims() {

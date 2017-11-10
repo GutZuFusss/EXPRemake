@@ -36,8 +36,6 @@ private:
 	int m_SpawnTick;
 	float m_AnimationTimer;
 
-	void TickRespawn();
-	void TickLifetime();
 	void TickAnims();
 	void TickPotionAnim();
 	void TickPickup();
