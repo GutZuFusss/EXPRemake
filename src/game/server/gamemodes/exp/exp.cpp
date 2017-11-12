@@ -467,51 +467,34 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 	return false;
 }
 
-void CGameControllerEXP::RegisterExpCommands()
-{
-	GameServer()->Console()->Register("teleflag", "ii", CFGFLAG_SERVER, ConTeleflag, GameServer(), "Teleport a player to a specific flag");
-	GameServer()->Console()->Register("teleport", "ii", CFGFLAG_SERVER, ConTeleport, GameServer(), "Teleport a player to another player");
+void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData) {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int CID1 = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
+	int CID2 = clamp(pResult->GetInteger(1), 0, (int)MAX_CLIENTS - 1);
+
+	if (pSelf->m_apPlayers[CID1] && pSelf->m_apPlayers[CID2]) {
+		CCharacter* pChr = pSelf->GetPlayerChar(CID1);
+		if (pChr) {
+			pChr->Teleport(pSelf->m_apPlayers[CID2]->m_ViewPos);
+		}
+	}
 }
 
-void CGameControllerEXP::ConTeleflag(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameControllerEXP *pSelf = (CGameControllerEXP *)pUserData;
+void CGameContext::ConTeleflag(IConsole::IResult *pResult, void *pUserData) {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameControllerEXP* expGC = (CGameControllerEXP*) pSelf->m_pController;
+	int CID1 = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
+	int FlagID = clamp(pResult->GetInteger(1), 0, (int)MAX_CHECKPOINTS - 1);
 
-	int ID = pResult->GetInteger(0);
-	int Flag = pResult->GetInteger(0);
-	
-	if(ID < 0 || ID >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID])
-		return;
-	if(pSelf->GameServer()->m_apPlayers[ID]->IsBot())
-		return;
-	
-	if(Flag < 0 || Flag > ((CGameControllerEXP*)pSelf->GameServer()->m_pController)->m_CurFlag)
-		return;
-	
-	pSelf->GameServer()->m_apPlayers[ID]->m_GameExp.m_LastFlag = Flag;
-	if(Flag == 0)
-		((CGameControllerEXP*)pSelf->GameServer()->m_pController)->RestartClient(ID);
-	else if(pSelf->GameServer()->m_apPlayers[ID]->GetCharacter())
-		pSelf->GameServer()->m_apPlayers[ID]->GetCharacter()->Teleport(((CGameControllerEXP*)pSelf->GameServer()->m_pController)->m_aFlagsCP[Flag-1]->m_Pos);
+	CPlayer* player = pSelf->m_apPlayers[CID1];
+	CFlag* flag = expGC->m_aFlagsCP[FlagID];
+
+	if (player && flag) {
+		CCharacter* pChr = pSelf->GetPlayerChar(CID1);
+		if (pChr) {
+			player->m_GameExp.m_LastFlag = FlagID;
+			pChr->Teleport(flag->m_Pos);
+		}
+	}
 }
 
-
-void CGameControllerEXP::ConTeleport(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameControllerEXP *pSelf = (CGameControllerEXP *)pUserData;
-
-	int ID1 = pResult->GetInteger(0);
-	int ID2 = pResult->GetInteger(1);
-	
-	if(ID1 < 0 || ID1 >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID1])
-		return;
-	if(pSelf->GameServer()->m_apPlayers[ID1]->IsBot() || !pSelf->GameServer()->m_apPlayers[ID1]->GetCharacter())
-		return;
-	
-	if(ID2 < 0 || ID2 >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID2])
-		return;
-	if(!pSelf->GameServer()->m_apPlayers[ID2]->GetCharacter())
-		return;
-	
-	pSelf->GameServer()->m_apPlayers[ID1]->GetCharacter()->Teleport(pSelf->GameServer()->m_apPlayers[ID2]->GetCharacter()->GetPos());
-}

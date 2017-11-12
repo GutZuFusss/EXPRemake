@@ -84,10 +84,6 @@ public:
 
 	const char *GetWeaponName(int WID);
 
-	bool Use(int ClientID, const char *aCommand);
-
-	void RegisterExpCommands();
-	static void ConTeleflag(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
+	bool Use(int ClientID, const char *aCommand);	
 };
 #endif
