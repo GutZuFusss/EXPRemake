@@ -1,16 +1,28 @@
 #ifndef BOTS_H
 #define BOTS_H
 
-enum
+
+const int MAX_BOT_SPAWNS = 256;
+
+enum BOTTYPES
 {
-	BOT_LEVELS=3,
-	MAX_BOT_SPAWNS=256 //per level
+	BOTTYPE_HAMMER,
+	BOTTYPE_GUN,
+	BOTTYPE_NINJA,
+	BOTTYPE_KAMIKAZE,
+	BOTTYPE_SHOTGUN,
+	BOTTYPE_GRENADE,
+	BOTTYPE_LASER,
+	BOTTYPE_THOR,
+	BOTTYPE_FLAGBEARER,
+	BOTTYPE_ENDBOSS,
+	NUM_BOTTYPES
 };
 
 struct CBotSpawn
 {
 	vec2 m_Pos;
-	int m_Level;
+	int m_BotType;
 	bool m_Spawned;
 	int m_RespawnTimer;
 };

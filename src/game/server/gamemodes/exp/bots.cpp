@@ -22,7 +22,7 @@ void CGameControllerEXP::TickBots()
 		CPlayer *p = GameServer()->m_apPlayers[b];
 		if(!p || !p->GetCharacter())
 			continue;
-		if(p->m_BotLevel == 4)
+		if(p->m_BotType == 4)
 			continue;
 		
 		bool Nobody = true;
@@ -53,7 +53,7 @@ void CGameControllerEXP::TickBots()
 	
 	
 	// CHECK FOR BOT SPAWNS
-	for(int l = 0; l < BOT_LEVELS; l++)
+	for(int l = 0; l < NUM_BOTTYPES; l++)
 	{
 		for(int s = 0; s < m_aNumBotSpawns[l]; s++)
 		{
@@ -166,7 +166,7 @@ void CGameControllerEXP::BotSpawn(CBotSpawn *pSpawn)
 	//GameServer()->m_apPlayers[BID]->SetTeam(0);
 	pSpawn->m_Spawned = true;
 	
-	if(pSpawn->m_Level == 4)
+	if(pSpawn->m_BotType == BOTTYPE_ENDBOSS)
 	{
 		m_Boss.m_ClientID = BID;
 		m_Boss.m_ShieldActive = false;
@@ -179,16 +179,9 @@ void CGameControllerEXP::RemoveBot(int ID, bool Killed)
 	GameServer()->m_apPlayers[ID]->m_pBotSpawn->m_Spawned = false;
 	if(Killed)
 		GameServer()->m_apPlayers[ID]->m_pBotSpawn->m_RespawnTimer = Server()->Tick();
-	
-	if(Killed)
-	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, 0, 0);//, GameServer()->m_apPlayers[ID]->m_LastPos);
-		pPickup->CreateRandomFromBot(GameServer()->m_apPlayers[ID]->m_BotLevel, GameServer()->m_apPlayers[ID]->m_LastPos);
-	}
-	
+		
 	delete GameServer()->m_apPlayers[ID]->m_pCharacter;
 	GameServer()->m_apPlayers[ID]->m_pCharacter = NULL;
-	//GameServer()->m_apPlayers[ID]->character = NULL;
 	delete GameServer()->m_apPlayers[ID];
 	GameServer()->m_apPlayers[ID] = NULL;
 }

@@ -24,7 +24,7 @@ CGameControllerEXP::CGameControllerEXP(class CGameContext *pGameServer)
 	m_CurMine = 0;
 	m_CurTrap = 0;
 
-	for(int i = 0; i < BOT_LEVELS; i++)
+	for(int i = 0; i < NUM_BOTTYPES; i++)
 		m_aNumBotSpawns[i] = 0;
 	
 	for(int i = 0; i < MAX_CHECKPOINTS; i++)
@@ -82,11 +82,6 @@ void CGameControllerEXP::Tick()
 						apCloseCharacters[i]->m_Health++;
 						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
 					}
-					else if(apCloseCharacters[i]->m_Armor < apCloseCharacters[i]->GetPlayer()->m_GameExp.m_ArmorMax) //regen armor
-					{
-						apCloseCharacters[i]->m_Armor++;
-						apCloseCharacters[i]->GetPlayer()->m_GameExp.m_RegenTimer = Server()->Tick();
-					}
 					else // regen ammo
 					{
 						int WID = apCloseCharacters[i]->m_ActiveWeapon;
@@ -116,40 +111,37 @@ void CGameControllerEXP::Tick()
 
 bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 {
-	if(IGameController::OnEntity(Index, Pos))
+	if (IGameController::OnEntity(Index, Pos)) {
 		return true;
+	}
 
-	int lvl = 0;
-	if(Index == ENTITY_SPAWN_BOT_LEVEL_1)
-		lvl = 1;
-	else if(Index == ENTITY_SPAWN_BOT_LEVEL_2)
-		lvl = 2;
-	else if(Index == ENTITY_SPAWN_BOT_LEVEL_3)
-		lvl = 3;
-	if(lvl != 0)
-	{
-		dbg_msg("exp", "bot spawn level %d added (%d)", lvl, m_aNumBotSpawns[lvl-1]);
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Pos = Pos;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Level = lvl;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_Spawned = false;
-		m_aaBotSpawns[lvl-1][m_aNumBotSpawns[lvl-1]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
-		m_aNumBotSpawns[lvl-1]++;
-	}
-	if(Index == ENTITY_SPAWN_BOSS)
-	{
-		if(m_Boss.m_Exist)
+	switch (Index) {
+	case ENTITY_SPAWN_BOT_HAMMER:
+		OnBotEntity(BOTTYPE_HAMMER, Pos);
+		break;
+	case ENTITY_SPAWN_BOT_GUN:
+		OnBotEntity(BOTTYPE_GUN, Pos);
+		break;
+	case ENTITY_SPAWN_BOT_KAMIKAZE:
+		OnBotEntity(BOTTYPE_KAMIKAZE, Pos);
+		break;
+	case ENTITY_SPAWN_BOT_SHOTGUN:
+		OnBotEntity(BOTTYPE_SHOTGUN, Pos);
+		break;
+	case ENTITY_SPAWN_BOT_ENDBOSS:
+		if (m_Boss.m_Exist) {
 			dbg_msg("exp", "there can't be 2 boss entities on one map");
-		else
-		{
-			dbg_msg("exp", "boss added");
-			m_Boss.m_Exist = true;
-			m_Boss.m_Spawn.m_Pos = Pos;
-			m_Boss.m_Spawn.m_Level = 4;
-			m_Boss.m_Spawn.m_Spawned = false;
-			m_Boss.m_Spawn.m_RespawnTimer = Server()->Tick() - GameServer()->Tuning()->m_RespawnTimer*Server()->TickSpeed();
+			break;
 		}
+		OnBotEntity(BOTTYPE_ENDBOSS, Pos);
+		dbg_msg("exp", "boss added");
+		break;
+	default:
+		break;
 	}
-	else if(Index == ENTITY_TURRET_LASER)
+
+	
+	if(Index == ENTITY_TURRET_LASER)
 	{
 		if(m_CurTurret < MAX_TURRETS)
 		{
@@ -254,22 +246,31 @@ bool CGameControllerEXP::OnEntity(int Index, vec2 Pos)
 		return true;
 	}
 
-	return true;
+	return false;
+}
+
+bool CGameControllerEXP::OnBotEntity(int BotType, vec2 pos) {
+	dbg_msg("exp", "bot spawn level %d added (%d)", BotType, m_aNumBotSpawns[BotType]);
+	m_aaBotSpawns[BotType][m_aNumBotSpawns[BotType]].m_Pos = pos;
+	m_aaBotSpawns[BotType][m_aNumBotSpawns[BotType]].m_BotType = BotType;
+	m_aaBotSpawns[BotType][m_aNumBotSpawns[BotType]].m_Spawned = false;
+	m_aaBotSpawns[BotType][m_aNumBotSpawns[BotType]].m_RespawnTimer = Server()->Tick() - (GameServer()->Tuning()->m_RespawnTimer - 2)*Server()->TickSpeed();
+	m_aNumBotSpawns[BotType]++;
+
+	return false;
 }
 
 bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 {
-	if(!strncmp(aMsg, "/info", 5) || !strncmp(aMsg, "!info", 5) || !strncmp(aMsg, "/help", 5))
+	if(!strncmp(aMsg, "/info", 5) || !strncmp(aMsg, "!info", 5) || !strncmp(aMsg, "/help", 5) || !strncmp(aMsg, "/about", 6))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                        EXPlorer");
-		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "Version 1.0 | by xush', original idea and mod by Choupom.");
-		GameServer()->SendChatTarget(ClientID, "You have to explore the map, fight monsters, collect items...");
-		GameServer()->SendChatTarget(ClientID, "Kill a monster to earn an Item (say /items for more info).");
-		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "Say /cmdlist for the command list.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "EXPlorer v2.0");
+		GameServer()->SendChatTarget(ClientID, "Based on the EXPlorer mod by <xush'> and <Choupom>");
+		GameServer()->SendChatTarget(ClientID, "Aim: explore, fight and eventually capture the blue flag");
+		GameServer()->SendChatTarget(ClientID, "Kill monsters to earn /items");
+		GameServer()->SendChatTarget(ClientID, "Say /cmdlist for the command list");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/top5", 5))
@@ -285,35 +286,33 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 	else if(!strncmp(aMsg, "/cmdlist", 8) || !strncmp(aMsg, "/cmd", 4))
 	{
 		GameServer()->SendChatTarget(ClientID, " ");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                    COMMAND LIST");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "COMMAND LIST");
 		GameServer()->SendChatTarget(ClientID, "");
 		GameServer()->SendChatTarget(ClientID, "'/info': Get info about the modification.");
 		GameServer()->SendChatTarget(ClientID, "'/top5': View the top 5 players.");
 		GameServer()->SendChatTarget(ClientID, "'/items': Get info about the items.");
 		GameServer()->SendChatTarget(ClientID, "'/new': Restart the game.");
 		GameServer()->SendChatTarget(ClientID, "'/bind': Learn how to bind a key to use an item.");
-		GameServer()->SendChatTarget(ClientID, "'/game': Show your weapons, kills, armor, etc.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "'/game': Shows your weapons and kills.");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/items", 6))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                           ITEMS");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "ITEMS");
 		GameServer()->SendChatTarget(ClientID, " ");
 		GameServer()->SendChatTarget(ClientID, "Check out '/bind' to learn how to bind items.");
 		GameServer()->SendChatTarget(ClientID, "Weapons: You keep it when you have it.");
-		GameServer()->SendChatTarget(ClientID, "Life: You can use it to respawn where you died.");
-		GameServer()->SendChatTarget(ClientID, "Minor Potion: Use it to get full health.");
-		GameServer()->SendChatTarget(ClientID, "Greater Potion: Use it to get full health and full armor.");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "Potion: Use it to restore health.");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	else if(!strncmp(aMsg, "/game", 5))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                                            GAME");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "GAME");
 		GameServer()->SendChatTarget(ClientID, " ");
 		
 		char aBuf[256] = {0};
@@ -328,28 +327,25 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 			}
 		}
 		GameServer()->SendChatTarget(ClientID, aBuf);
-		
-		str_format(aBuf, sizeof(aBuf), "Armor: %d", GameServer()->m_apPlayers[ClientID]->m_GameExp.m_ArmorMax);
-		GameServer()->SendChatTarget(ClientID, aBuf);
-		
+				
 		str_format(aBuf, sizeof(aBuf), "Kills: %d", GameServer()->m_apPlayers[ClientID]->m_Score);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 		
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	
 	else if(!strncmp(aMsg, "/bind", 5))
 	{
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		GameServer()->SendChatTarget(ClientID, "                              BIND DOCUMENTATION");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "BIND DOCUMENTATION");
 		GameServer()->SendChatTarget(ClientID, "");
 		GameServer()->SendChatTarget(ClientID, "1) Open the Local Console (F1).");
 		GameServer()->SendChatTarget(ClientID, "2) Type \"bind <key> say <item>\"");
 		GameServer()->SendChatTarget(ClientID, "Replace <key> by the key you want to press.");
-		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: life, minor or greater.");
-		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say life\"");
-		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		GameServer()->SendChatTarget(ClientID, "Replace <item> by the item: potion.");
+		GameServer()->SendChatTarget(ClientID, "Example: \"bind l say potion\"");
+		GameServer()->SendChatTarget(ClientID, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		return true;
 	}
 	
@@ -359,21 +355,9 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 		return true;
 	}
 	
-	else if(!strncmp(aMsg, "/life", 5) || !strncmp(aMsg, "life", 4))
+	else if(!strncmp(aMsg, "/potion", 7) || !strncmp(aMsg, "potion", 7))
 	{
-		Use(ClientID, "Life");
-		return true;
-	}
-
-	else if(!strncmp(aMsg, "/minor", 6) || !strncmp(aMsg, "minor", 5))
-	{
-		Use(ClientID, "Minor Potion");
-		return true;
-	}
-
-	else if(!strncmp(aMsg, "/greater", 8) || !strncmp(aMsg, "greater", 7))
-	{
-		Use(ClientID, "Greater Potion");
+		Use(ClientID, "Potion");
 		return true;
 	}
 	
@@ -391,8 +375,8 @@ bool CGameControllerEXP::CheckCommand(int ClientID, int Team, const char *aMsg)
 void CGameControllerEXP::StartClient(int ID)
 {
 	GameServer()->m_apPlayers[ID]->KillCharacter(WEAPON_GAME);
-	CItems Items; Items.m_Lives = 0; Items.m_MinorPotions = 0; Items.m_GreaterPotions = 0;
-	GameServer()->m_apPlayers[ID]->LoadGame(m_aaSpawnPoints[1][0], 0, 0, 0, 0, 0, Items, false, false);
+	CItems Items; Items.m_Potions = 0;
+	GameServer()->m_apPlayers[ID]->LoadNewGame(m_aaSpawnPoints[1][0]);
 	GameServer()->m_apPlayers[ID]->m_GameExp.m_EnterTick = Server()->Tick();
 	//SendItems(ID);
 }
@@ -409,13 +393,13 @@ void CGameControllerEXP::StopClient(int ID)
 	GameServer()->SaveRank(g_Config.m_SvMap, Server()->ClientName(ID), GameServer()->m_apPlayers[ID]->m_GameExp.m_Time, GameServer()->m_apPlayers[ID]->m_GameExp.m_Kills);
 	
 	bool GotFreezer = false;
-	if(GameServer()->m_apPlayers[ID]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_FREEZER))
+	if(GameServer()->m_apPlayers[ID]->m_GameExp.m_Weapons & (int)pow((int)2, (int)WEAPON_FREEZER))
 		GotFreezer = true;
 	
 	RestartClient(ID);
 	
 	if(GotFreezer)
-		GameServer()->m_apPlayers[ID]->GetWeapon(WEAPON_FREEZER);
+		GameServer()->m_apPlayers[ID]->GiveWeaponPermanently(WEAPON_FREEZER, -1);
 }
 
 void CGameControllerEXP::RestartClient(int ID)
@@ -457,69 +441,25 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 {
 	CPlayer *p = GameServer()->m_apPlayers[ClientID];
 	
-	if(str_find_nocase(aCommand, "Life"))
-	{
-		if(p->m_GameExp.m_Items.m_Lives > 0)
-		{
-			if(p->GetTeam() != -1 && !p->GetCharacter())
-			{
-				p->m_GameExp.m_Items.m_Lives--;
-				p->LoadGame(p->m_ViewPos, p->m_GameExp.m_LastFlag, p->m_Score, p->m_GameExp.m_Time, p->m_GameExp.m_ArmorMax, p->m_GameExp.m_Weapons, p->m_GameExp.m_Items, p->m_GameExp.m_BossHitter, p->m_GameExp.m_BossKiller);
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Life used. %d lives left.", p->m_GameExp.m_Items.m_Lives);
-				GameServer()->SendChatTarget(ClientID, aBuf);
-			}
-			else
-				GameServer()->SendChatTarget(ClientID, "You are not dead!");
-		}
-		else
-			GameServer()->SendChatTarget(ClientID, "You haven't got a life!");
-		return true;
-	}
-
-	else if(str_find_nocase(aCommand, "Minor Potion"))
+	if(str_find_nocase(aCommand, "Potion"))
 	{
 		if(p->GetCharacter())
 		{
-			if(p->m_GameExp.m_Items.m_MinorPotions > 0)
+			if(p->m_GameExp.m_Items.m_Potions > 0)
 			{
 				if(p->GetCharacter()->m_Health < 10)
 				{
-					p->m_GameExp.m_Items.m_MinorPotions--;
+					p->m_GameExp.m_Items.m_Potions--;
 					p->GetCharacter()->m_Health = 10;
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "Minor Potion used. You have %d Minor Potions left.", p->m_GameExp.m_Items.m_MinorPotions);
+					str_format(aBuf, sizeof(aBuf), "<Potion> used. You have %d <Potions> left.", p->m_GameExp.m_Items.m_Potions);
 					GameServer()->SendChatTarget(ClientID, aBuf);
 				}
 				else
 					GameServer()->SendChatTarget(ClientID, "You don't need to use that now!");
 			}
 			else
-				GameServer()->SendChatTarget(ClientID, "You haven't got a Minor Potion!");
-		}
-		return true;
-	}
-
-	else if(str_find_nocase(aCommand, "Greater Potion"))
-	{
-		if(p->GetCharacter())
-		{
-			if(p->m_GameExp.m_Items.m_GreaterPotions > 0)
-			{
-				if(p->GetCharacter()->m_Health < 10 || p->GetCharacter()->m_Armor < p->m_GameExp.m_ArmorMax)
-				{
-					p->m_GameExp.m_Items.m_GreaterPotions--;
-					p->GetCharacter()->m_Health = 10;
-					p->GetCharacter()->m_Armor = p->m_GameExp.m_ArmorMax;
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "Greater Potion used. You have %d Greater Potions left.", p->m_GameExp.m_Items.m_GreaterPotions);
-					GameServer()->SendChatTarget(ClientID, aBuf);
-				}
-				else
-					GameServer()->SendChatTarget(ClientID, "You don't need to use that now!");
-			}
-			else
-				GameServer()->SendChatTarget(ClientID, "You haven't got a Greater Potion!");
+				GameServer()->SendChatTarget(ClientID, "You haven't got a <Potion>!");
 		}
 		return true;
 	}
@@ -527,51 +467,34 @@ bool CGameControllerEXP::Use(int ClientID, const char *aCommand)
 	return false;
 }
 
-void CGameControllerEXP::RegisterExpCommands()
-{
-	GameServer()->Console()->Register("teleflag", "ii", CFGFLAG_SERVER, ConTeleflag, GameServer(), "Teleport a player to a specific flag");
-	GameServer()->Console()->Register("teleport", "ii", CFGFLAG_SERVER, ConTeleport, GameServer(), "Teleport a player to another player");
+void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData) {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int CID1 = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
+	int CID2 = clamp(pResult->GetInteger(1), 0, (int)MAX_CLIENTS - 1);
+
+	if (pSelf->m_apPlayers[CID1] && pSelf->m_apPlayers[CID2]) {
+		CCharacter* pChr = pSelf->GetPlayerChar(CID1);
+		if (pChr) {
+			pChr->Teleport(pSelf->m_apPlayers[CID2]->m_ViewPos);
+		}
+	}
 }
 
-void CGameControllerEXP::ConTeleflag(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameControllerEXP *pSelf = (CGameControllerEXP *)pUserData;
+void CGameContext::ConTeleflag(IConsole::IResult *pResult, void *pUserData) {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameControllerEXP* expGC = (CGameControllerEXP*) pSelf->m_pController;
+	int CID1 = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
+	int FlagID = clamp(pResult->GetInteger(1), 0, (int)MAX_CHECKPOINTS - 1);
 
-	int ID = pResult->GetInteger(0);
-	int Flag = pResult->GetInteger(0);
-	
-	if(ID < 0 || ID >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID])
-		return;
-	if(pSelf->GameServer()->m_apPlayers[ID]->IsBot())
-		return;
-	
-	if(Flag < 0 || Flag > ((CGameControllerEXP*)pSelf->GameServer()->m_pController)->m_CurFlag)
-		return;
-	
-	pSelf->GameServer()->m_apPlayers[ID]->m_GameExp.m_LastFlag = Flag;
-	if(Flag == 0)
-		((CGameControllerEXP*)pSelf->GameServer()->m_pController)->RestartClient(ID);
-	else if(pSelf->GameServer()->m_apPlayers[ID]->GetCharacter())
-		pSelf->GameServer()->m_apPlayers[ID]->GetCharacter()->Teleport(((CGameControllerEXP*)pSelf->GameServer()->m_pController)->m_aFlagsCP[Flag-1]->m_Pos);
+	CPlayer* player = pSelf->m_apPlayers[CID1];
+	CFlag* flag = expGC->m_aFlagsCP[FlagID];
+
+	if (player && flag) {
+		CCharacter* pChr = pSelf->GetPlayerChar(CID1);
+		if (pChr) {
+			player->m_GameExp.m_LastFlag = FlagID;
+			pChr->Teleport(flag->m_Pos);
+		}
+	}
 }
 
-
-void CGameControllerEXP::ConTeleport(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameControllerEXP *pSelf = (CGameControllerEXP *)pUserData;
-
-	int ID1 = pResult->GetInteger(0);
-	int ID2 = pResult->GetInteger(1);
-	
-	if(ID1 < 0 || ID1 >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID1])
-		return;
-	if(pSelf->GameServer()->m_apPlayers[ID1]->IsBot() || !pSelf->GameServer()->m_apPlayers[ID1]->GetCharacter())
-		return;
-	
-	if(ID2 < 0 || ID2 >= MAX_CLIENTS || !pSelf->GameServer()->m_apPlayers[ID2])
-		return;
-	if(!pSelf->GameServer()->m_apPlayers[ID2]->GetCharacter())
-		return;
-	
-	pSelf->GameServer()->m_apPlayers[ID1]->GetCharacter()->Teleport(pSelf->GameServer()->m_apPlayers[ID2]->GetCharacter()->GetPos());
-}

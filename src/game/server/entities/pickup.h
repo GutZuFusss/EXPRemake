@@ -7,8 +7,8 @@
 
 const int PickupPhysSize = 14;
 
-class CPickup : public CEntity
-{
+class CPickup : public CEntity {
+
 public:
 	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0);
 
@@ -17,23 +17,23 @@ public:
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
-	// EXP
-	bool m_FromDrop;
-	float m_AnimationTimer;
-	float m_DieTimer;
-	bool m_IsBossShield;
 	
 	const char *GetWeaponName(int wid);
 	int RealPickup(int Type);
 	int RealSubtype(int Type);
-	void CreateRandomFromBot(int lvl, vec2 Pos);
 	void CreateRandomFromTurret(int TurretType, vec2 Pos);
 	void MakeBossShield();
 
-private:
+protected:
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;
+	float m_AnimationTimer;
+
+	void TickAnims();
+	void TickPotionAnim();
+	void TickPickup();
+	virtual void HandleRespawn(int RespawnTime);
 };
 
 #endif

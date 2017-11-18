@@ -4,7 +4,9 @@ config.lua
 datasrc/__pycache__
 datasrc/*.pyc
 objs
-src/game/generated
+src/game/generated/*
+!src/game/generated/server_data.cpp
+!src/game/generated/protocol.h
 SDL.dll
 freetype.dll
 saves.db
@@ -20,3 +22,13 @@ teeworlds*
 teeworlds_srv*
 tileset_border*
 versionsrv*
+
+.idea
+.vs
+cmake-build-debug
+Debug
+CMakeLists.txt
+EXP.*
+exp_config.cfg
+exp_srv.lnk
+

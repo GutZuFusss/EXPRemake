@@ -9,20 +9,9 @@
 #include "environment.h"
 #include "bots.h"
 
-enum
-{
-	ITEM_LIFE=0,
-	ITEM_MINOR_POTION,
-	ITEM_GREATER_POTION,
-	NUM_ITEMS
-};
-
-
 struct CItems
 {
-	int m_Lives;
-	int m_MinorPotions;
-	int m_GreaterPotions;
+	int m_Potions;
 };
 
 enum
@@ -37,6 +26,7 @@ public:
 	CGameControllerEXP(class CGameContext *pGameServer);
 	virtual void Tick();
 	virtual bool OnEntity(int Index, vec2 Pos);
+	bool OnBotEntity(int BotType, vec2 pos);
 	bool CheckCommand(int ClientID, int Team, const char *pMsg);
 
 	int m_CurTurret;
@@ -59,6 +49,18 @@ public:
 	void BuildDoor(int d);
 
 	void TickEnvironment();
+	void TickPlayerRelatedEnvironment();
+	void TickPlayerUnrelatedEnvironment();
+	void TickTeleport(CPlayer* player);
+	void TickWeaponStrip(CPlayer* player);
+	void TickZones(CPlayer* player);
+	void TickHealingZone(CCharacter* character, CPlayer* player);
+	void TickPoisonZone(CCharacter* character, CPlayer* player);
+	void TickMines();
+	void TickTraps();
+	void TickTurrets();
+	void TickLaserTurrets();
+	void TickGunTurrets();
 	void TickBots();
 
 	// bots functions
@@ -67,8 +69,8 @@ public:
 	void RemoveBot(int ID, bool Killed);
 
 	// bots variables
-	CBotSpawn m_aaBotSpawns[BOT_LEVELS][MAX_BOT_SPAWNS];
-	int m_aNumBotSpawns[BOT_LEVELS];
+	CBotSpawn m_aaBotSpawns[NUM_BOTTYPES][MAX_BOT_SPAWNS]; //todo use list instead?
+	int m_aNumBotSpawns[NUM_BOTTYPES];
 	CBoss m_Boss;
 
 	//flags
@@ -82,10 +84,6 @@ public:
 
 	const char *GetWeaponName(int WID);
 
-	bool Use(int ClientID, const char *aCommand);
-
-	void RegisterExpCommands();
-	static void ConTeleflag(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
+	bool Use(int ClientID, const char *aCommand);	
 };
 #endif

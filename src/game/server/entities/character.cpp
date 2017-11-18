@@ -8,11 +8,13 @@
 #include <game/server/gamemodes/exp/exp.h>
 #include <game/server/gamemodes/exp/environment.h>
 #include <game/server/gamemodes/exp/bots.h>
+#include <game/server/gamemodes/exp/loothandler.h>
 
 #include "character.h"
 #include "door.h"
 #include "laser.h"
 #include "projectile.h"
+#include "pickup.h"
 
 //input count
 struct CInputCount
@@ -496,6 +498,7 @@ bool CCharacter::GiveWeapon(int Weapon, int Ammo)
 	{
 		m_aWeapons[Weapon].m_Got = true;
 		m_aWeapons[Weapon].m_Ammo = min(g_pData->m_Weapons.m_aId[Weapon].m_Maxammo, Ammo);
+		GetPlayer()->GiveWeaponPermanently(Weapon, Ammo);
 		return true;
 	}
 	return false;
@@ -737,9 +740,9 @@ bool CCharacter::IncreaseHealth(int Amount)
 
 bool CCharacter::IncreaseArmor(int Amount)
 {
-	if(m_Armor >= m_pPlayer->MaxHealth())
+	if (m_Armor >= 10)
 		return false;
-	m_Armor = clamp(m_Armor+Amount, 0, m_pPlayer->MaxHealth());
+	m_Armor = clamp(m_Armor + Amount, 0, 10);
 	return true;
 }
 
@@ -777,26 +780,35 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 
-	if(m_pPlayer->IsBot() && Killer >= 0 && Killer < MAX_CLIENTS)
+	//we don't want to cast to CPlayer if this fails
+	if (Killer < 0 || Killer > MAX_CLIENTS) {
+		return;
+	}
+
+	CPlayer* KillerPlayer = GameServer()->m_apPlayers[Killer];
+	if (KillerPlayer) {
+		KillerPlayer->m_Score++;
+		if (m_pPlayer->IsBot()) {
+			OnBotDeath(KillerPlayer, Weapon);
+		}
+	}
+}
+
+void CCharacter::OnBotDeath(CPlayer* Killer, int Weapon) {
+	if (Killer && !Killer->IsBot()) {
+		CLootHandler::HandleLoot(&GameServer()->m_World, m_Pos, m_pPlayer->m_BotType);
+	}
+
+	if (m_pPlayer->m_BotType == 4) {
+		OnBossBotDeath();
+	}
+}
+
+void CCharacter::OnBossBotDeath() {
+	for (int i = 0; i < g_Config.m_SvMaxClients; i++)
 	{
-		if(GameServer()->m_apPlayers[Killer] && GameServer()->m_apPlayers[Killer]->GetCharacter() && !GameServer()->m_apPlayers[Killer]->IsBot() && !(GameServer()->m_apPlayers[Killer]->m_GameExp.m_Weapons & (int)pow(2, WEAPON_GUN)))
-		{
-			GameServer()->m_apPlayers[Killer]->GetWeapon(WEAPON_GUN);
-            GameServer()->SendWeaponPickup(Killer, WEAPON_GUN);
-			GameServer()->SendChatTarget(GameServer()->m_apPlayers[Killer]->GetCID(), "Picked up: GUN. Say /items for more info.");
-		}
-
-		if(GameServer()->m_apPlayers[Killer])
-			GameServer()->m_apPlayers[Killer]->m_Score++;
-
-		if(m_pPlayer->m_BotLevel == 4)
-		{
-			for(int i = 0; i < g_Config.m_SvMaxClients; i++)
-			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_GameExp.m_BossHitter)
-					GameServer()->m_apPlayers[i]->m_GameExp.m_BossKiller = true;
-			}
-		}
+		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_GameExp.m_BossHitter)
+			GameServer()->m_apPlayers[i]->m_GameExp.m_BossKiller = true;
 	}
 }
 
@@ -805,47 +817,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	// debug...
 	//if(!m_pPlayer->IsBot())
 	//	return false;
-	if(m_pPlayer->IsBot() && m_pPlayer->m_BotLevel == 4)
+	if(m_pPlayer->IsBot() && m_pPlayer->m_BotType == 4)
 	{
 		if(From >= 0 && GameServer()->m_apPlayers[From])
 			GameServer()->m_apPlayers[From]->m_GameExp.m_BossHitter = true;
-		
-		/*CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
-		
-		if(pBoss->m_ShieldActive)
-		{
-			if(Weapon == WEAPON_HAMMER)
-				pBoss->m_ShieldHealth -= 3;
-			else
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH);
-			
-			if(pBoss->m_ShieldHealth <= 12 && pBoss->m_apShieldIcons[2])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[2]);
-				pBoss->m_apShieldIcons[2] = NULL;
-			}
-			if(pBoss->m_ShieldHealth <= 6 && pBoss->m_apShieldIcons[1])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[1]);
-				pBoss->m_apShieldIcons[1] = NULL;
-			}
-			if(pBoss->m_ShieldHealth <= 0 && pBoss->m_apShieldIcons[0])
-			{
-				GameServer()->m_World.DestroyEntity((CEntity*)pBoss->m_apShieldIcons[0]);
-				pBoss->m_apShieldIcons[0] = NULL;
-			}
-			
-			if(pBoss->m_ShieldHealth <= 0)
-			{
-				pBoss->m_ShieldActive = false;
-				pBoss->m_ShieldTimer = Server()->Tick() + 15.0f*Server()->TickSpeed();
-				GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
-				GameServer()->CreateExplosion(m_Pos, -1, WEAPON_WORLD, 5);
-			}
-			
-			m_Core.m_Vel += Force*0.5f;
-			return true;
-		}*/
 	}
 
 	m_Core.m_Vel += Force;
@@ -983,7 +958,7 @@ void CCharacter::Snap(int SnappingClient)
 	else
 		pCharacter->m_Weapon = m_ActiveWeapon;
 
-	if(m_pPlayer->m_BotLevel == 2 && !m_Frozen)
+	if(m_pPlayer->m_BotType == 2 && !m_Frozen)
 		m_AttackTick = Server()->Tick();
 
 	pCharacter->m_AttackTick = m_AttackTick;
@@ -1019,7 +994,7 @@ void CCharacter::Freeze()
 	m_LastWeapon = m_ActiveWeapon;
 	m_ActiveWeapon = WEAPON_NINJA;
 	
-	if(m_pPlayer->m_BotLevel == 4)
+	if(m_pPlayer->m_BotType == 4)
 	{
 		CBoss *pBoss = &((CGameControllerEXP*)GameServer()->m_pController)->m_Boss;
 		pBoss->m_ShieldHealth = 0;
@@ -1127,7 +1102,7 @@ void CCharacter::HandleBot()
 	if(!TargetChr)
 		return;
 	
-	if(m_pPlayer->m_BotLevel == 1)
+	if(m_pPlayer->m_BotType == BOTTYPE_GUN)
 	{
 		//1) weapon :
 		if(distance(TargetChr->m_Pos, m_Pos) < 64.0f)
@@ -1167,7 +1142,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 2)
+	else if(m_pPlayer->m_BotType == BOTTYPE_KAMIKAZE)
 	{
 		//1) move :
 		if(m_Pos.x < TargetChr->m_Pos.x)
@@ -1193,7 +1168,7 @@ void CCharacter::HandleBot()
 			m_Input.m_Fire = 1;
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 3)
+	else if(m_pPlayer->m_BotType == BOTTYPE_SHOTGUN)
 	{
 		//1) weapon :
 		bool Shotgun = false;
@@ -1277,7 +1252,7 @@ void CCharacter::HandleBot()
 			}
 		}
 	}
-	else if(m_pPlayer->m_BotLevel == 4)
+	else if(m_pPlayer->m_BotType == BOTTYPE_ENDBOSS)
 	{
 		CBoss *pBoss = &((CGameControllerEXP *)GameServer()->m_pController)->m_Boss;
 		

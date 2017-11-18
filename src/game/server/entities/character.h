@@ -65,6 +65,8 @@ public:
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 
 	// EXP
+	void OnBotDeath(CPlayer* Killer, int Weapon);
+	void OnBossBotDeath();
 	void Freeze();
 	bool m_Frozen;
 	float m_FrozenTimer;

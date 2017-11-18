@@ -1586,6 +1586,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
+
+	//EXP
+	Console()->Register("tele", "ii", CFGFLAG_SERVER, ConTeleport, this, "Teleport a player to another player");
+	Console()->Register("teleflag", "ii", CFGFLAG_SERVER, ConTeleflag, this, "Teleport a player to a specific flag");
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
@@ -1610,8 +1614,6 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	// select gametype
 	m_pController = new CGameControllerEXP(this);
-
-	((CGameControllerEXP*)m_pController)->RegisterExpCommands();
 
 	// setup core world
 	//for(int i = 0; i < MAX_CLIENTS; i++)

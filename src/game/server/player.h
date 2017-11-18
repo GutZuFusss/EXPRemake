@@ -99,7 +99,7 @@ public:
 
 	// bots
 	struct CBotSpawn *m_pBotSpawn;
-	int m_BotLevel;
+	int m_BotType;
 	inline bool IsBot() { return m_Team == 1; };
 	void MakeBot(struct CBotSpawn *pSpawn);
 	void DestroyBot();
@@ -110,14 +110,20 @@ public:
 	vec2 m_LastPos;
 	float m_NobodyTimer;
 
+	struct WeaponStat
+	{
+		int m_StartAmmo;
+		bool m_Got;
+	};
+
 	struct CGame
 	{
 		int m_EnterTick; //ticks
 		int m_Time; //seconds
 		int m_Kills;
 		int m_LastFlag;
-		int m_ArmorMax;
 		int m_Weapons;
+		WeaponStat m_PermaWeapons[NUM_WEAPONS+2];
 		int m_RegenTimer; //ticks
 		int m_PoisonTimer; //ticks
 		CItems m_Items;
@@ -125,8 +131,11 @@ public:
 		bool m_BossKiller;
 	} m_GameExp;
 
-	void LoadGame(vec2 SpawnPos, int Flag, int Kills, int Time, int Armor, int w, CItems Items, bool BHitter, bool BKiller);
-	bool GetWeapon(int WID);
+	void LoadNewGame(vec2 SpawnPos);
+	void LoadGame(vec2 SpawnPos, int Time);
+	bool GiveWeaponPermanently(int Weapon, int PermaStartAmmo);
+	bool HasWeaponPermanently(int Weapon);
+	void RemovePermaWeapons();
 
 	// lil hack
 	CFlag *m_pClosestFlag;
