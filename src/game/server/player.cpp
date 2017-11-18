@@ -68,9 +68,9 @@ void CPlayer::Tick()
 	}
 	else
 	{
-		m_Latency.m_Avg = 420;
-		m_Latency.m_Max = 420;
-		m_Latency.m_Min = 420;
+		m_Latency.m_Avg = 42;
+		m_Latency.m_Max = 42;
+		m_Latency.m_Min = 42;
 	}
 
 	if(!GameServer()->m_World.m_Paused)
